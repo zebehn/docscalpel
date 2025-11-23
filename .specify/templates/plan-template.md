@@ -31,7 +31,32 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+This section verifies compliance with the Figure Extractor Constitution (v1.0.0).
+
+### I. Library-First Architecture
+- [ ] Feature designed as standalone library
+- [ ] Library has clear, documented interface
+- [ ] Library is independently testable
+- [ ] Library has single, well-defined purpose
+- [ ] No implicit dependencies on parent systems
+
+### II. Test-Driven Development (NON-NEGOTIABLE)
+- [ ] Tests will be written BEFORE implementation
+- [ ] Tests will be reviewed and approved BEFORE coding begins
+- [ ] Red-Green-Refactor cycle will be followed
+- [ ] Contract tests planned for library interfaces
+- [ ] Integration tests planned for inter-library communication
+
+### III. Simplicity & Clear Contracts
+- [ ] Text-based I/O planned (stdin/args → stdout)
+- [ ] JSON and human-readable output supported
+- [ ] Structured logging included
+- [ ] APIs have explicit, versioned contracts
+- [ ] Complexity justified (no unnecessary abstractions)
+
+**Status**: [ ] PASS / [ ] NEEDS JUSTIFICATION
+
+**Complexity Justifications** (if any): See Complexity Tracking section below
 
 ## Project Structure
 

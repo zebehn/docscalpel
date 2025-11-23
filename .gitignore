@@ -2,6 +2,8 @@
 .specify/
 .claude/
 specs/
+CLAUDE.md
+docs/CLAUDE.md
 
 # Python
 __pycache__/

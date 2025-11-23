@@ -2,8 +2,9 @@
 
 **Surgical Precision for Document Element Extraction**
 
-**Author**: DocScalpel Team
+**Author**: Minsu Jang (Electronics and Telecommunications Research Institute)
 **Date**: November 20, 2025
+**Last Updated**: November 23, 2025 - Package restructuring and API improvements
 **Topics**: Document Analysis, Computer Vision, PDF Processing, Deep Learning
 
 ---
@@ -1276,20 +1277,50 @@ With comprehensive documentation:
 
 ---
 
-**Contact**: For questions, issues, or contributions, please open an issue on the repository.
+**Contact**: For questions, issues, or contributions:
+- Email: minsu@etri.re.kr
+- GitHub Issues: https://github.com/zebehn/docscalpel/issues
 
-**License**: [Specify license here]
+**License**: MIT License
 
 **Citation**:
 ```bibtex
 @software{docscalpel_2025,
-  author = {DocScalpel Team},
+  author = {Jang, Minsu},
   title = {DocScalpel: Surgical Precision for PDF Element Extraction},
   year = {2025},
-  url = {https://github.com/yourusername/docscalpel}
+  url = {https://github.com/zebehn/docscalpel}
 }
 ```
 
 ---
 
-*Last updated: November 20, 2025*
+## Recent Updates (November 2025)
+
+### Package Restructuring (v1.0.0)
+
+DocScalpel has undergone a major refactoring to adopt Python packaging best practices:
+
+**New Package Structure:**
+- Migrated from `src/lib/` to `docscalpel/` for cleaner imports
+- Added `__main__.py` for standard module execution
+- Simplified API: `from docscalpel import extract_elements`
+- Professional CLI: `python -m docscalpel paper.pdf`
+
+**Benefits:**
+- ✅ PyPI-ready distribution
+- ✅ Cleaner, more intuitive API
+- ✅ Standard Python module patterns
+- ✅ Production-ready package structure
+
+**Breaking Changes:**
+- Old: `from src.lib.extractor import extract_elements`
+- New: `from docscalpel import extract_elements`
+- Old: `python -m src.cli.main paper.pdf`
+- New: `python -m docscalpel paper.pdf`
+
+All documentation and 140+ tests have been updated to reflect the new structure.
+
+---
+
+*Last updated: November 23, 2025*

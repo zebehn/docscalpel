@@ -86,8 +86,8 @@ python -m docscalpel --help
 ```
 
 **📖 CLI Documentation:**
-- **[5-Minute Quick Start](QUICKSTART_CLI.md)** - Get started immediately
-- **[Complete CLI Manual](CLI_MANUAL.md)** - Full reference with examples
+- **[5-Minute Quick Start](docs/QUICKSTART_CLI.md)** - Get started immediately
+- **[Complete CLI Manual](docs/CLI_MANUAL.md)** - Full reference with examples
 - **[Technical Deep Dive](docs/technical-blog-post.md)** - Architecture and implementation details
 
 ## How It Works

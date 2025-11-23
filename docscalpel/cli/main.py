@@ -92,9 +92,9 @@ def create_argument_parser() -> argparse.ArgumentParser:
         Configured ArgumentParser instance
     """
     parser = argparse.ArgumentParser(
-        prog='pdf-extractor',
+        prog='docscalpel',
         description='Extract figures, tables, and equations from PDF files',
-        epilog='Example: pdf-extractor paper.pdf --types figure,table --output ./extracted'
+        epilog='Example: docscalpel paper.pdf --types figure,table --output ./extracted'
     )
 
     # Required arguments
@@ -184,7 +184,7 @@ def main() -> int:
         Exit code (0 for success, non-zero for failure)
 
     Example:
-        >>> sys.argv = ['pdf-extractor', 'paper.pdf', '--types', 'figure']
+        >>> sys.argv = ['docscalpel', 'paper.pdf', '--types', 'figure']
         >>> exit_code = main()
         >>> print(f"Exit code: {exit_code}")
     """

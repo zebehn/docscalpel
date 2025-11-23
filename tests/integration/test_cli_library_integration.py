@@ -38,7 +38,7 @@ class TestCLIArgumentParsing:
         """
         from docscalpel.cli.main import main
 
-        test_args = ['pdf-extractor', sample_pdf_path]
+        test_args = ['docscalpel', sample_pdf_path]
 
         with patch('sys.argv', test_args):
             exit_code = main()
@@ -64,7 +64,7 @@ class TestCLIArgumentParsing:
 
         custom_dir = temp_output_dir / "custom"
         test_args = [
-            'pdf-extractor',
+            'docscalpel',
             sample_pdf_path,
             '--output', str(custom_dir)
         ]
@@ -86,7 +86,7 @@ class TestCLIArgumentParsing:
         from docscalpel.cli.main import main
 
         test_args = [
-            'pdf-extractor',
+            'docscalpel',
             sample_pdf_path,
             '--types', 'figure',
             '--output', str(temp_output_dir)
@@ -108,7 +108,7 @@ class TestCLIArgumentParsing:
         from docscalpel.cli.main import main
 
         test_args = [
-            'pdf-extractor',
+            'docscalpel',
             sample_pdf_path,
             '--types', 'figure,table,equation',
             '--output', str(temp_output_dir)
@@ -130,7 +130,7 @@ class TestCLIArgumentParsing:
         from docscalpel.cli.main import main
 
         test_args = [
-            'pdf-extractor',
+            'docscalpel',
             sample_pdf_path,
             '--format', 'json',
             '--output', str(temp_output_dir)
@@ -158,7 +158,7 @@ class TestCLIArgumentParsing:
         from docscalpel.cli.main import main
 
         test_args = [
-            'pdf-extractor',
+            'docscalpel',
             sample_pdf_path,
             '--confidence', '0.8',
             '--output', str(temp_output_dir)
@@ -180,7 +180,7 @@ class TestCLIArgumentParsing:
         from docscalpel.cli.main import main
 
         test_args = [
-            'pdf-extractor',
+            'docscalpel',
             sample_pdf_path,
             '--naming-pattern', 'extracted_{type}_{counter:03d}.pdf',
             '--output', str(temp_output_dir)
@@ -202,7 +202,7 @@ class TestCLIArgumentParsing:
         from docscalpel.cli.main import main
 
         test_args = [
-            'pdf-extractor',
+            'docscalpel',
             sample_pdf_path,
             '--padding', '10',
             '--output', str(temp_output_dir)
@@ -224,7 +224,7 @@ class TestCLIArgumentParsing:
         from docscalpel.cli.main import main
 
         test_args = [
-            'pdf-extractor',
+            'docscalpel',
             sample_pdf_path,
             '--max-pages', '5',
             '--output', str(temp_output_dir)
@@ -246,7 +246,7 @@ class TestCLIArgumentParsing:
         from docscalpel.cli.main import main
 
         test_args = [
-            'pdf-extractor',
+            'docscalpel',
             sample_pdf_path,
             '--overwrite',
             '--output', str(temp_output_dir)
@@ -272,7 +272,7 @@ class TestCLIErrorHandling:
         from docscalpel.cli.main import main
 
         test_args = [
-            'pdf-extractor',
+            'docscalpel',
             '/nonexistent/file.pdf',
             '--output', str(temp_output_dir)
         ]
@@ -294,7 +294,7 @@ class TestCLIErrorHandling:
         from docscalpel.cli.main import main
 
         test_args = [
-            'pdf-extractor',
+            'docscalpel',
             sample_pdf_path,
             '--types', 'invalid_type',
             '--output', str(temp_output_dir)
@@ -316,7 +316,7 @@ class TestCLIErrorHandling:
         from docscalpel.cli.main import main
 
         test_args = [
-            'pdf-extractor',
+            'docscalpel',
             sample_pdf_path,
             '--confidence', '1.5',
             '--output', str(temp_output_dir)
@@ -342,7 +342,7 @@ class TestCLIOutputFormats:
         from docscalpel.cli.main import main
 
         test_args = [
-            'pdf-extractor',
+            'docscalpel',
             sample_pdf_path,
             '--format', 'text',
             '--output', str(temp_output_dir)
@@ -367,7 +367,7 @@ class TestCLIOutputFormats:
         """
         from docscalpel.cli.main import main
 
-        test_args = ['pdf-extractor', '--help']
+        test_args = ['docscalpel', '--help']
 
         with patch('sys.argv', test_args):
             with pytest.raises(SystemExit) as exc_info:
@@ -390,7 +390,7 @@ class TestCLIOutputFormats:
         """
         from docscalpel.cli.main import main
 
-        test_args = ['pdf-extractor', '--version']
+        test_args = ['docscalpel', '--version']
 
         with patch('sys.argv', test_args):
             with pytest.raises(SystemExit) as exc_info:
@@ -418,7 +418,7 @@ class TestCLIVerboseMode:
         from docscalpel.cli.main import main
 
         test_args = [
-            'pdf-extractor',
+            'docscalpel',
             sample_pdf_path,
             '--verbose',
             '--output', str(temp_output_dir)

@@ -224,7 +224,7 @@ class TestCLIPDFLibraryIntegration:
         from docscalpel.cli.main import main
 
         test_args = [
-            'pdf-extractor',
+            'docscalpel',
             sample_pdf_with_figures,
             '--types', 'figure',
             '--output', temp_output_dir,
@@ -258,7 +258,7 @@ class TestCLIPDFLibraryIntegration:
 
         # Use non-existent file to trigger PyMuPDF error
         test_args = [
-            'pdf-extractor',
+            'docscalpel',
             '/nonexistent/file.pdf',
             '--output', temp_output_dir,
             '--format', 'json',
@@ -287,7 +287,7 @@ class TestCLIPDFLibraryIntegration:
         from docscalpel.cli.main import main
 
         test_args = [
-            'pdf-extractor',
+            'docscalpel',
             sample_pdf_with_figures,
             '--types', 'figure',
             '--output', temp_output_dir,

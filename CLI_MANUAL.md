@@ -66,20 +66,7 @@ cd /path/to/docscalpel
 pip install -e .
 
 # 3. Run from anywhere
-pdf-extractor paper.pdf
-```
-
-### Method 3: Using the Executable Script
-
-```bash
-# 1. Navigate to the project directory
-cd /path/to/docscalpel
-
-# 2. Make the script executable (Unix/macOS only)
-chmod +x pdf-extractor
-
-# 3. Run the script
-./pdf-extractor paper.pdf
+docscalpel paper.pdf
 ```
 
 ### Verify Installation
@@ -87,7 +74,7 @@ chmod +x pdf-extractor
 ```bash
 # Check version
 python -m docscalpel --version
-# Output: pdf-extractor 1.0.0
+# Output: docscalpel 1.0.0
 
 # Show help
 python -m docscalpel --help
@@ -158,7 +145,7 @@ python -m docscalpel PDF_FILE [OPTIONS]
 Or if installed via pip:
 
 ```bash
-pdf-extractor PDF_FILE [OPTIONS]
+docscalpel PDF_FILE [OPTIONS]
 ```
 
 ### Positional Arguments

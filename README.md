@@ -13,6 +13,7 @@ A Python library and CLI application for detecting and extracting figures, table
 [![Tests](https://img.shields.io/badge/tests-134%20passing-success)](tests/)
 [![Coverage](https://img.shields.io/badge/coverage-76%25-yellow)](tests/)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## Status
 
@@ -229,7 +230,7 @@ For detailed documentation, see:
 
 ## License
 
-[To be determined]
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Authors & Contact
 

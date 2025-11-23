@@ -1,6 +1,7 @@
 # Specify and Claude configuration
 .specify/
 .claude/
+specs/
 
 # Python
 __pycache__/

@@ -222,11 +222,7 @@ $ python -m src.cli.main research_paper.pdf
 ## Documentation
 
 For detailed documentation, see:
-- **[Technical Blog Post](docs/technical-blog-post.md)** - Complete technical deep dive
-- [Implementation Plan](specs/001-pdf-extractor/plan.md) - Development roadmap
-- [Data Model](specs/001-pdf-extractor/data-model.md) - Core data structures
-- [API Contracts](specs/001-pdf-extractor/contracts/) - Library and CLI interfaces
-- [Quickstart Guide](specs/001-pdf-extractor/quickstart.md) - Testing each user story
+- **[Technical Blog Post](docs/technical-blog-post.md)** - Complete technical deep dive with architecture and implementation details
 
 ## License
 

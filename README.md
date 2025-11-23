@@ -37,7 +37,7 @@ A Python library and CLI application for detecting and extracting figures, table
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/docscalpel.git
+git clone https://github.com/zebehn/docscalpel.git
 cd docscalpel
 
 # Install dependencies
@@ -231,6 +231,14 @@ For detailed documentation, see:
 
 [To be determined]
 
+## Authors & Contact
+
+**Main Developer**: Minsu Jang
+**Email**: minsu@etri.re.kr
+**Organization**: Electronics and Telecommunications Research Institute (ETRI)
+
+For questions, bug reports, or collaboration inquiries, please contact the main developer or open an issue on GitHub.
+
 ## Contributing
 
 Contributions welcome! Please ensure all tests pass and follow the TDD workflow.
@@ -241,10 +249,10 @@ If you use DocScalpel in your research, please cite:
 
 ```bibtex
 @software{docscalpel_2025,
-  author = {DocScalpel Contributors},
+  author = {Jang, Minsu},
   title = {DocScalpel: Precision PDF Element Extraction},
   year = {2025},
-  url = {https://github.com/yourusername/docscalpel}
+  url = {https://github.com/zebehn/docscalpel}
 }
 ```
 

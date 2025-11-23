@@ -105,6 +105,11 @@ extracted_elements/
 temp/
 tmp/
 
+# Test output files (generated during test runs)
+figure_*.pdf
+table_*.pdf
+equation_*.pdf
+
 # Model files (large binary files)
 *.pth
 *.onnx

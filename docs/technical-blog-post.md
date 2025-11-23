@@ -140,16 +140,17 @@ The system follows a **pipeline architecture** with clear separation of concerns
 ### Module Structure
 
 ```
-src/
-├── lib/                          # Core library
-│   ├── models.py                 # Data models (Element, BoundingBox, Document)
-│   ├── pdf_processor.py          # PDF loading and validation
-│   ├── extractor.py              # Main orchestrator
-│   ├── cropper.py                # PDF region extraction
-│   └── detectors/
-│       ├── figure_detector.py    # Figure detection with DocLayout-YOLO
-│       ├── table_detector.py     # Table detection
-│       └── equation_detector.py  # Equation detection
+docscalpel/
+├── __init__.py                   # Public API exports
+├── __main__.py                   # CLI entry point (python -m docscalpel)
+├── models.py                     # Data models (Element, BoundingBox, Document)
+├── pdf_processor.py              # PDF loading and validation
+├── extractor.py                  # Main orchestrator
+├── cropper.py                    # PDF region extraction
+├── detectors/
+│   ├── figure_detector.py        # Figure detection with DocLayout-YOLO
+│   ├── table_detector.py         # Table detection
+│   └── equation_detector.py      # Equation detection
 └── cli/
     ├── main.py                   # CLI entry point
     ├── formatter.py              # Output formatting (JSON/text)
@@ -158,7 +159,7 @@ src/
 
 ### Design Principles
 
-1. **Library-First**: Core logic in `src/lib/`, independent of CLI
+1. **Library-First**: Core logic in `docscalpel/`, independent of CLI
 2. **Single Responsibility**: Each module has one clear purpose
 3. **Dependency Injection**: Detectors are pluggable
 4. **Error Boundaries**: Failures are isolated (page-level, element-level)
@@ -1060,7 +1061,7 @@ python -m docscalpel paper.pdf --format json > result.json
 
 **1. Library-First**
 
-CLI is a thin wrapper over `src/lib/`:
+CLI is a thin wrapper over the core library:
 ```python
 # CLI implementation
 def main():

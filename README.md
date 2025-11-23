@@ -104,22 +104,26 @@ DocScalpel combines state-of-the-art deep learning with robust PDF processing:
 
 The system follows a **Library-First Architecture**:
 
-- **Core Library** (`src/lib/`): Standalone extraction engine
-- **CLI Application** (`src/cli/`): Thin wrapper for command-line use
+- **Core Library** (`docscalpel/`): Standalone extraction engine
+- **CLI Application** (`docscalpel/cli/`): Thin wrapper for command-line use
 - **Independent Testing**: Library testable without CLI dependencies
 
 ### Project Structure
 
 ```
-src/
-├── lib/                 # Core extraction library
-│   ├── extractor.py    # Main extraction orchestrator
-│   ├── detectors/      # Element detection (figure, table, equation)
-│   ├── pdf_processor.py # PDF parsing
-│   ├── cropper.py      # PDF cropping
-│   └── models.py       # Data models
+docscalpel/
+├── __init__.py         # Public API exports
+├── __main__.py         # CLI entry point (python -m docscalpel)
+├── extractor.py        # Main extraction orchestrator
+├── models.py           # Data models
+├── pdf_processor.py    # PDF parsing
+├── cropper.py          # PDF cropping
+├── detectors/          # Element detection
+│   ├── figure_detector.py
+│   ├── table_detector.py
+│   └── equation_detector.py
 └── cli/                # CLI application
-    ├── main.py         # Entry point
+    ├── main.py         # CLI entry point
     ├── formatter.py    # Output formatting
     └── logger.py       # Logging
 

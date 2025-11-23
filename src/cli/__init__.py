@@ -1,5 +1,5 @@
 """
-CLI package for PDF Element Extractor.
+CLI package for DocScalpel.
 
 Provides command-line interface for the extraction library.
 """

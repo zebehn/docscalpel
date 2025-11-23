@@ -1,4 +1,4 @@
-# DocScalpel: Building a Deep Learning-Powered PDF Element Extractor
+# DocScalpel: A Deep Learning-Powered PDF Element Extraction Tool
 
 **Surgical Precision for Document Element Extraction**
 

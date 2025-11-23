@@ -1,4 +1,4 @@
-# PDF Element Extractor - Quick Start Guide
+# DocScalpel - Quick Start Guide
 
 **5-Minute Guide to Get Started**
 

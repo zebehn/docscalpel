@@ -1,5 +1,5 @@
 """
-Pytest configuration and shared fixtures for PDF Element Extractor tests.
+Pytest configuration and shared fixtures for DocScalpel tests.
 
 This module provides reusable test fixtures for sample PDFs, test data,
 and common test utilities.

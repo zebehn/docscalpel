@@ -1,4 +1,4 @@
-# PDF Element Extractor - CLI User Manual
+# DocScalpel - CLI User Manual
 
 **Version**: 1.0.0
 **Date**: 2025-11-20
@@ -21,7 +21,7 @@
 
 ## Introduction
 
-PDF Element Extractor is a command-line tool that automatically detects and extracts figures, tables, and equations from academic PDF papers. It uses deep learning (DocLayout-YOLO) to identify elements and saves each as a separate, numbered PDF file.
+DocScalpel is a command-line tool that automatically detects and extracts figures, tables, and equations from academic PDF papers. It uses deep learning (DocLayout-YOLO) to identify elements and saves each as a separate, numbered PDF file.
 
 ### What It Does
 
@@ -689,7 +689,7 @@ python -m src.cli.main paper.pdf --verbose 2> debug.log
 
 **Output**: `debug.log` contains detailed execution trace:
 ```
-2025-11-20 10:30:15 - __main__ - INFO - PDF Element Extractor v1.0.0
+2025-11-20 10:30:15 - __main__ - INFO - DocScalpel v1.0.0
 2025-11-20 10:30:15 - __main__ - INFO - Processing: paper.pdf
 2025-11-20 10:30:15 - src.lib.extractor - DEBUG - Configuration: ExtractionConfig(...)
 2025-11-20 10:30:15 - src.lib.extractor - INFO - Validating PDF: paper.pdf
@@ -888,5 +888,5 @@ optional arguments:
 
 ---
 
-**PDF Element Extractor v1.0.0**
+**DocScalpel v1.0.0**
 Copyright © 2025 | For support and updates, visit the project repository

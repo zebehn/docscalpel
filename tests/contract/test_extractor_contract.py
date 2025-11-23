@@ -15,7 +15,7 @@ import pytest
 from pathlib import Path
 from typing import List
 
-from src.lib.models import (
+from docscalpel.models import (
     ElementType,
     ExtractionConfig,
     ExtractionResult,
@@ -34,7 +34,7 @@ class TestExtractElementsContract:
     def test_extract_elements_function_exists(self):
         """Verify extract_elements() function is importable."""
         # This will fail until we implement the function
-        from src.lib.extractor import extract_elements
+        from docscalpel.extractor import extract_elements
         assert callable(extract_elements)
 
     def test_extract_elements_with_valid_pdf_returns_result(
@@ -47,7 +47,7 @@ class TestExtractElementsContract:
         When: extract_elements() is called
         Then: Returns ExtractionResult with success=True
         """
-        from src.lib.extractor import extract_elements
+        from docscalpel.extractor import extract_elements
 
         # Update config to use temp directory
         figure_only_config.output_directory = str(temp_output_dir)
@@ -72,7 +72,7 @@ class TestExtractElementsContract:
         When: extract_elements() is called
         Then: Uses default configuration and succeeds
         """
-        from src.lib.extractor import extract_elements
+        from docscalpel.extractor import extract_elements
 
         result = extract_elements(sample_pdf_path, None)
 
@@ -87,7 +87,7 @@ class TestExtractElementsContract:
         When: extract_elements() is called
         Then: Configuration is applied correctly
         """
-        from src.lib.extractor import extract_elements
+        from docscalpel.extractor import extract_elements
 
         result = extract_elements(sample_pdf_path, custom_config)
 
@@ -106,7 +106,7 @@ class TestExtractElementsContract:
         When: extract_elements() is called
         Then: Directory is created automatically
         """
-        from src.lib.extractor import extract_elements
+        from docscalpel.extractor import extract_elements
 
         output_dir = tmp_path / "new_output"
         assert not output_dir.exists()
@@ -129,7 +129,7 @@ class TestExtractElementsContract:
         When: extract_elements() is called
         Then: Raises InvalidPDFError with clear message
         """
-        from src.lib.extractor import extract_elements
+        from docscalpel.extractor import extract_elements
 
         # Create a non-PDF file
         invalid_file = tmp_path / "not_a_pdf.txt"
@@ -151,7 +151,7 @@ class TestExtractElementsContract:
         When: extract_elements() is called
         Then: Raises InvalidPDFError
         """
-        from src.lib.extractor import extract_elements
+        from docscalpel.extractor import extract_elements
 
         missing_file = tmp_path / "does_not_exist.pdf"
         config = ExtractionConfig(output_directory=str(tmp_path))
@@ -167,7 +167,7 @@ class TestExtractElementsContract:
         When: extract_elements() is called
         Then: Raises ConfigurationError
         """
-        from src.lib.extractor import extract_elements
+        from docscalpel.extractor import extract_elements
 
         # This should fail during config creation
         with pytest.raises(ConfigurationError):
@@ -183,7 +183,7 @@ class TestExtractElementsContract:
         When: Result is returned
         Then: All contract fields are present and valid
         """
-        from src.lib.extractor import extract_elements
+        from docscalpel.extractor import extract_elements
 
         config = ExtractionConfig(
             element_types=[ElementType.FIGURE],
@@ -217,7 +217,7 @@ class TestExtractElementsContract:
         When: Extraction completes
         Then: Individual PDF files are created in output directory
         """
-        from src.lib.extractor import extract_elements
+        from docscalpel.extractor import extract_elements
 
         config = ExtractionConfig(
             element_types=[ElementType.FIGURE],
@@ -241,7 +241,7 @@ class TestExtractElementsContract:
         When: extract_elements() is called
         Then: Returns success=True with empty elements list
         """
-        from src.lib.extractor import extract_elements
+        from docscalpel.extractor import extract_elements
 
         config = ExtractionConfig(
             element_types=[ElementType.FIGURE],
@@ -264,7 +264,7 @@ class TestExtractElementsContract:
         When: extract_elements() is called
         Then: Only high-confidence elements are returned
         """
-        from src.lib.extractor import extract_elements
+        from docscalpel.extractor import extract_elements
 
         config = ExtractionConfig(
             element_types=[ElementType.FIGURE],
@@ -288,7 +288,7 @@ class TestExtractElementsContract:
         When: extract_elements() is called
         Then: Filenames use sequential numbering (figure_01, figure_02, etc.)
         """
-        from src.lib.extractor import extract_elements
+        from docscalpel.extractor import extract_elements
 
         config = ExtractionConfig(
             element_types=[ElementType.FIGURE],
@@ -316,8 +316,8 @@ class TestExtractElementsEdgeCases:
         When: extract_elements() is called
         Then: Raises EncryptedPDFError
         """
-        from src.lib.extractor import extract_elements
-        from src.lib.models import EncryptedPDFError
+        from docscalpel.extractor import extract_elements
+        from docscalpel.models import EncryptedPDFError
 
         # This test will be skipped if no encrypted PDF fixture exists
         pytest.skip("Encrypted PDF fixture not yet available")
@@ -330,8 +330,8 @@ class TestExtractElementsEdgeCases:
         When: extract_elements() is called
         Then: Raises CorruptedPDFError
         """
-        from src.lib.extractor import extract_elements
-        from src.lib.models import CorruptedPDFError
+        from docscalpel.extractor import extract_elements
+        from docscalpel.models import CorruptedPDFError
 
         # Create a corrupted PDF (truncated content)
         corrupted_pdf = tmp_path / "corrupted.pdf"
@@ -352,7 +352,7 @@ class TestExtractElementsEdgeCases:
         When: extract_elements() is called
         Then: Elements are ordered by page_number, then by position
         """
-        from src.lib.extractor import extract_elements
+        from docscalpel.extractor import extract_elements
 
         config = ExtractionConfig(
             element_types=[ElementType.FIGURE],

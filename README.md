@@ -52,8 +52,7 @@ pip install -r requirements.txt
 ### As a Library
 
 ```python
-from src.lib.extractor import extract_elements
-from src.lib.models import ExtractionConfig, ElementType
+from docscalpel import extract_elements, ExtractionConfig, ElementType
 
 # Extract all figures
 config = ExtractionConfig(element_types=[ElementType.FIGURE])
@@ -68,22 +67,22 @@ for element in result.elements:
 
 ```bash
 # Extract all element types (figures, tables, equations)
-python -m src.cli.main paper.pdf
+python -m docscalpel paper.pdf
 
 # Extract only figures
-python -m src.cli.main paper.pdf --types figure
+python -m docscalpel paper.pdf --types figure
 
 # Custom output directory
-python -m src.cli.main paper.pdf --output ./extracted
+python -m docscalpel paper.pdf --output ./extracted
 
 # JSON output for scripting
-python -m src.cli.main paper.pdf --format json | jq '.statistics'
+python -m docscalpel paper.pdf --format json | jq '.statistics'
 
 # High confidence threshold with padding
-python -m src.cli.main paper.pdf --confidence 0.8 --padding 10
+python -m docscalpel paper.pdf --confidence 0.8 --padding 10
 
 # Get help
-python -m src.cli.main --help
+python -m docscalpel --help
 ```
 
 **📖 CLI Documentation:**
@@ -201,7 +200,7 @@ Support custom output directories, naming patterns, and boundary padding.
 ## Real-World Example
 
 ```bash
-$ python -m src.cli.main research_paper.pdf
+$ python -m docscalpel research_paper.pdf
 
 ✅ Extraction completed successfully
 

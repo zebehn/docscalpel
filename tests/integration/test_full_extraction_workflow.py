@@ -15,7 +15,7 @@ import pytest
 from pathlib import Path
 import time
 
-from src.lib.models import (
+from docscalpel.models import (
     ElementType,
     ExtractionConfig,
     ExtractionResult,
@@ -40,7 +40,7 @@ class TestUserStory1FigureExtraction:
 
         This is the PRIMARY acceptance test from the specification.
         """
-        from src.lib.extractor import extract_elements
+        from docscalpel.extractor import extract_elements
 
         # Setup: Configure for figure extraction only
         config = ExtractionConfig(
@@ -74,7 +74,7 @@ class TestUserStory1FigureExtraction:
 
         Performance Target: Process 20-page PDF in under 30 seconds.
         """
-        from src.lib.extractor import extract_elements
+        from docscalpel.extractor import extract_elements
 
         config = ExtractionConfig(
             element_types=[ElementType.FIGURE],
@@ -102,7 +102,7 @@ class TestUserStory1FigureExtraction:
         When: Using default naming pattern
         Then: Filenames have zero-padded numbers (01, 02, not 1, 2)
         """
-        from src.lib.extractor import extract_elements
+        from docscalpel.extractor import extract_elements
 
         config = ExtractionConfig(
             element_types=[ElementType.FIGURE],
@@ -127,7 +127,7 @@ class TestUserStory1FigureExtraction:
         When: Extract with element_types=[FIGURE]
         Then: Returns success with empty results, no files created
         """
-        from src.lib.extractor import extract_elements
+        from docscalpel.extractor import extract_elements
 
         config = ExtractionConfig(
             element_types=[ElementType.FIGURE],
@@ -155,7 +155,7 @@ class TestUserStory1FigureExtraction:
         When: Extraction completes
         Then: Document has page_count, file_size, metadata populated
         """
-        from src.lib.extractor import extract_elements
+        from docscalpel.extractor import extract_elements
 
         config = ExtractionConfig(
             element_types=[ElementType.FIGURE],
@@ -189,7 +189,7 @@ class TestUserStory2MultiTypeExtraction:
 
         This tests the multi-type extraction capability.
         """
-        from src.lib.extractor import extract_elements
+        from docscalpel.extractor import extract_elements
 
         # Setup: Configure for all element types
         config = ExtractionConfig(
@@ -233,7 +233,7 @@ class TestUserStory2MultiTypeExtraction:
         When: Multi-type extraction runs
         Then: Overlapping elements are deduplicated (highest confidence kept)
         """
-        from src.lib.extractor import extract_elements
+        from docscalpel.extractor import extract_elements
 
         config = ExtractionConfig(
             element_types=[ElementType.FIGURE, ElementType.TABLE],
@@ -273,7 +273,7 @@ class TestUserStory3CustomConfiguration:
         When: Extraction runs
         Then: Directory is created and files are placed there
         """
-        from src.lib.extractor import extract_elements
+        from docscalpel.extractor import extract_elements
 
         custom_dir = tmp_path / "my_custom_output" / "figures"
         assert not custom_dir.exists()
@@ -300,7 +300,7 @@ class TestUserStory3CustomConfiguration:
         When: Extraction runs
         Then: Files named img_001.pdf, img_002.pdf, etc.
         """
-        from src.lib.extractor import extract_elements
+        from docscalpel.extractor import extract_elements
 
         config = ExtractionConfig(
             element_types=[ElementType.FIGURE],
@@ -325,7 +325,7 @@ class TestUserStory3CustomConfiguration:
         When: Extraction runs
         Then: Extracted regions are 10px larger in all directions
         """
-        from src.lib.extractor import extract_elements
+        from docscalpel.extractor import extract_elements
 
         # Extract without padding
         config_no_padding = ExtractionConfig(
@@ -361,7 +361,7 @@ class TestUserStory3CustomConfiguration:
         When: Extraction runs with overwrite_existing=True
         Then: Files are overwritten
         """
-        from src.lib.extractor import extract_elements
+        from docscalpel.extractor import extract_elements
 
         config = ExtractionConfig(
             element_types=[ElementType.FIGURE],
@@ -396,8 +396,8 @@ class TestErrorHandlingWorkflow:
         When: Extraction is attempted
         Then: Clear error message with actionable guidance
         """
-        from src.lib.extractor import extract_elements
-        from src.lib.models import InvalidPDFError
+        from docscalpel.extractor import extract_elements
+        from docscalpel.models import InvalidPDFError
 
         invalid_file = tmp_path / "not_a_pdf.txt"
         invalid_file.write_text("This is plain text, not a PDF")
@@ -423,8 +423,8 @@ class TestErrorHandlingWorkflow:
         When: Extraction is attempted
         Then: Clear error message about missing file
         """
-        from src.lib.extractor import extract_elements
-        from src.lib.models import InvalidPDFError
+        from docscalpel.extractor import extract_elements
+        from docscalpel.models import InvalidPDFError
 
         missing_file = tmp_path / "does_not_exist.pdf"
 
@@ -460,7 +460,7 @@ class TestErrorHandlingWorkflow:
         When: Extraction runs
         Then: Successful elements are still extracted and errors are logged
         """
-        from src.lib.extractor import extract_elements
+        from docscalpel.extractor import extract_elements
 
         config = ExtractionConfig(
             element_types=[ElementType.FIGURE],
@@ -491,7 +491,7 @@ class TestExtractionResultValidation:
         When: Counting files in output directory
         Then: File count matches result.total_elements
         """
-        from src.lib.extractor import extract_elements
+        from docscalpel.extractor import extract_elements
 
         config = ExtractionConfig(
             element_types=[ElementType.FIGURE],
@@ -514,7 +514,7 @@ class TestExtractionResultValidation:
         When: Accessing result properties
         Then: figure_count, table_count, etc. are correct
         """
-        from src.lib.extractor import extract_elements
+        from docscalpel.extractor import extract_elements
 
         config = ExtractionConfig(
             element_types=[ElementType.FIGURE, ElementType.TABLE],
@@ -557,8 +557,8 @@ class TestErrorHandlingWorkflow:
 
         Flow: extract_elements() → validate_pdf() → file not found → error
         """
-        from src.lib.extractor import extract_elements
-        from src.lib.models import PDFExtractorError
+        from docscalpel.extractor import extract_elements
+        from docscalpel.models import PDFExtractorError
 
         config = ExtractionConfig(
             element_types=[ElementType.FIGURE],
@@ -578,8 +578,8 @@ class TestErrorHandlingWorkflow:
 
         Flow: extract_elements() → validate_pdf() → PyMuPDF error → InvalidPDFError
         """
-        from src.lib.extractor import extract_elements
-        from src.lib.models import InvalidPDFError
+        from docscalpel.extractor import extract_elements
+        from docscalpel.models import InvalidPDFError
         import tempfile
 
         # Create a fake "PDF" file
@@ -614,7 +614,7 @@ class TestErrorHandlingWorkflow:
         Note: PyMuPDF may successfully open some encrypted PDFs if they don't
         require a password. This test verifies we detect encryption when present.
         """
-        from src.lib.pdf_processor import validate_pdf
+        from docscalpel.pdf_processor import validate_pdf
         import fitz
 
         # Create an encrypted PDF
@@ -636,7 +636,7 @@ class TestErrorHandlingWorkflow:
 
         Flow: ExtractionConfig validation → ConfigurationError
         """
-        from src.lib.models import ConfigurationError
+        from docscalpel.models import ConfigurationError
 
         # Test: Invalid confidence threshold (> 1.0)
         with pytest.raises(ConfigurationError) as excinfo:
@@ -668,8 +668,8 @@ class TestErrorHandlingWorkflow:
 
         Flow: extract_elements() → create output dir → permission denied → error
         """
-        from src.lib.extractor import extract_elements
-        from src.lib.models import ConfigurationError
+        from docscalpel.extractor import extract_elements
+        from docscalpel.models import ConfigurationError
         import os
         import stat
 
@@ -691,7 +691,7 @@ class TestErrorHandlingWorkflow:
 
             # Attempt to extract with unwritable output directory
             # Can raise ConfigurationError, PermissionError, OSError, or ExtractionFailedError
-            from src.lib.models import ExtractionFailedError
+            from docscalpel.models import ExtractionFailedError
             with pytest.raises((ConfigurationError, PermissionError, OSError, ExtractionFailedError)) as excinfo:
                 extract_elements(sample_pdf_path, config)
 
@@ -708,8 +708,8 @@ class TestErrorHandlingWorkflow:
 
         Flow: extract_elements() → PyMuPDF detects corruption → CorruptedPDFError
         """
-        from src.lib.extractor import extract_elements
-        from src.lib.models import InvalidPDFError, CorruptedPDFError
+        from docscalpel.extractor import extract_elements
+        from docscalpel.models import InvalidPDFError, CorruptedPDFError
         import tempfile
 
         # Create a PDF-like file with corrupted structure
@@ -742,7 +742,7 @@ class TestErrorHandlingWorkflow:
 
         Note: PyMuPDF requires at least 1 page, so we test with a minimal 1-page PDF.
         """
-        from src.lib.extractor import extract_elements
+        from docscalpel.extractor import extract_elements
         import fitz
 
         # Create minimal PDF (1 blank page)
@@ -772,7 +772,7 @@ class TestErrorHandlingWorkflow:
 
         Flow: extract_elements() → detect → 0 elements found → success with empty results
         """
-        from src.lib.extractor import extract_elements
+        from docscalpel.extractor import extract_elements
         import fitz
 
         # Create PDF with just blank pages (no figures/tables/equations)
@@ -803,7 +803,7 @@ class TestErrorHandlingWorkflow:
 
         Flow: extract_elements() → error occurs → temporary files cleaned up
         """
-        from src.lib.extractor import extract_elements
+        from docscalpel.extractor import extract_elements
         import tempfile
 
         # Create invalid PDF that will cause error

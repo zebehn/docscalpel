@@ -18,19 +18,19 @@ pip install -r requirements.txt
 ### Extract Everything (Figures, Tables, Equations)
 
 ```bash
-python -m src.cli.main paper.pdf
+python -m docscalpel paper.pdf
 ```
 
 ### Extract Only Figures
 
 ```bash
-python -m src.cli.main paper.pdf --types figure
+python -m docscalpel paper.pdf --types figure
 ```
 
 ### Extract to Specific Folder
 
 ```bash
-python -m src.cli.main paper.pdf --output ./my_figures
+python -m docscalpel paper.pdf --output ./my_figures
 ```
 
 ---
@@ -39,15 +39,15 @@ python -m src.cli.main paper.pdf --output ./my_figures
 
 | What I Want | Command |
 |-------------|---------|
-| Extract figures only | `python -m src.cli.main paper.pdf --types figure` |
-| Extract tables only | `python -m src.cli.main paper.pdf --types table` |
-| Extract to folder | `python -m src.cli.main paper.pdf --output ./extracted` |
-| Get JSON output | `python -m src.cli.main paper.pdf --format json` |
-| High confidence only | `python -m src.cli.main paper.pdf --confidence 0.8` |
-| Add padding around elements | `python -m src.cli.main paper.pdf --padding 10` |
-| Process first 10 pages only | `python -m src.cli.main paper.pdf --max-pages 10` |
-| See detailed logs | `python -m src.cli.main paper.pdf --verbose` |
-| Get help | `python -m src.cli.main --help` |
+| Extract figures only | `python -m docscalpel paper.pdf --types figure` |
+| Extract tables only | `python -m docscalpel paper.pdf --types table` |
+| Extract to folder | `python -m docscalpel paper.pdf --output ./extracted` |
+| Get JSON output | `python -m docscalpel paper.pdf --format json` |
+| High confidence only | `python -m docscalpel paper.pdf --confidence 0.8` |
+| Add padding around elements | `python -m docscalpel paper.pdf --padding 10` |
+| Process first 10 pages only | `python -m docscalpel paper.pdf --max-pages 10` |
+| See detailed logs | `python -m docscalpel paper.pdf --verbose` |
+| Get help | `python -m docscalpel --help` |
 
 ---
 
@@ -73,7 +73,7 @@ python -m src.cli.main paper.pdf --output ./my_figures
 ### JSON Output
 
 ```bash
-python -m src.cli.main paper.pdf --format json
+python -m docscalpel paper.pdf --format json
 ```
 
 ```json
@@ -95,7 +95,7 @@ python -m src.cli.main paper.pdf --format json
 ### Example 1: Extract Figures from Research Paper
 
 ```bash
-python -m src.cli.main research_paper.pdf \
+python -m docscalpel research_paper.pdf \
   --types figure \
   --output ./figures \
   --confidence 0.7
@@ -104,7 +104,7 @@ python -m src.cli.main research_paper.pdf \
 ### Example 2: Extract All Elements with Custom Names
 
 ```bash
-python -m src.cli.main paper.pdf \
+python -m docscalpel paper.pdf \
   --types figure,table,equation \
   --output ./extracted \
   --naming-pattern "element_{counter:03d}.pdf"
@@ -113,7 +113,7 @@ python -m src.cli.main paper.pdf \
 ### Example 3: Quick Test on First 20 Pages
 
 ```bash
-python -m src.cli.main large_paper.pdf \
+python -m docscalpel large_paper.pdf \
   --max-pages 20 \
   --output ./test
 ```
@@ -121,7 +121,7 @@ python -m src.cli.main large_paper.pdf \
 ### Example 4: JSON Output for Automation
 
 ```bash
-python -m src.cli.main paper.pdf --format json > results.json
+python -m docscalpel paper.pdf --format json > results.json
 cat results.json | jq '.statistics'
 ```
 
@@ -150,4 +150,4 @@ cat results.json | jq '.statistics'
 
 ---
 
-**Need Help?** Run `python -m src.cli.main --help`
+**Need Help?** Run `python -m docscalpel --help`

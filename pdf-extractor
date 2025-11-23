@@ -8,11 +8,11 @@ This script can be run directly: ./pdf-extractor paper.pdf
 import sys
 from pathlib import Path
 
-# Add src directory to path
-src_dir = Path(__file__).parent / 'src'
-sys.path.insert(0, str(src_dir))
+# Add parent directory to path to import docscalpel package
+parent_dir = Path(__file__).parent
+sys.path.insert(0, str(parent_dir))
 
-from cli.main import main
+from docscalpel.cli.main import main
 
 if __name__ == '__main__':
     sys.exit(main())

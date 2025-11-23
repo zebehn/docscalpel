@@ -14,7 +14,7 @@ import pytest
 from unittest.mock import Mock, patch, MagicMock
 from typing import List
 
-from src.lib.models import (
+from docscalpel.models import (
     ElementType,
     BoundingBox,
     Element,
@@ -29,7 +29,7 @@ class TestFigureDetector:
 
     def test_figure_detector_class_exists(self):
         """Verify FigureDetector class is importable."""
-        from src.lib.detectors.figure_detector import FigureDetector
+        from docscalpel.detectors.figure_detector import FigureDetector
         assert FigureDetector is not None
 
     def test_figure_detector_initialization(self):
@@ -40,7 +40,7 @@ class TestFigureDetector:
         When: FigureDetector is instantiated
         Then: Creates detector with default confidence threshold
         """
-        from src.lib.detectors.figure_detector import FigureDetector
+        from docscalpel.detectors.figure_detector import FigureDetector
 
         detector = FigureDetector(confidence_threshold=0.5)
 
@@ -50,7 +50,7 @@ class TestFigureDetector:
 
     def test_figure_detector_detect_method_exists(self):
         """Verify detect() method exists on FigureDetector."""
-        from src.lib.detectors.figure_detector import FigureDetector
+        from docscalpel.detectors.figure_detector import FigureDetector
 
         detector = FigureDetector(confidence_threshold=0.5)
         assert callable(getattr(detector, 'detect', None))
@@ -63,7 +63,7 @@ class TestFigureDetector:
         When: detect() is called
         Then: Returns list of Element objects with type FIGURE
         """
-        from src.lib.detectors.figure_detector import FigureDetector
+        from docscalpel.detectors.figure_detector import FigureDetector
 
         detector = FigureDetector(confidence_threshold=0.5)
 
@@ -86,7 +86,7 @@ class TestFigureDetector:
         When: detect() is called with threshold=0.8
         Then: Only returns elements with confidence >= 0.8
         """
-        from src.lib.detectors.figure_detector import FigureDetector
+        from docscalpel.detectors.figure_detector import FigureDetector
 
         detector = FigureDetector(confidence_threshold=0.8)
 
@@ -104,7 +104,7 @@ class TestFigureDetector:
         When: detect() is called
         Then: Each element has valid BoundingBox with page dimensions
         """
-        from src.lib.detectors.figure_detector import FigureDetector
+        from docscalpel.detectors.figure_detector import FigureDetector
 
         detector = FigureDetector(confidence_threshold=0.5)
 
@@ -129,7 +129,7 @@ class TestFigureDetector:
         When: detect() is called
         Then: Returns empty list, no errors
         """
-        from src.lib.detectors.figure_detector import FigureDetector
+        from docscalpel.detectors.figure_detector import FigureDetector
 
         detector = FigureDetector(confidence_threshold=0.5)
 
@@ -147,7 +147,7 @@ class TestFigureDetector:
         When: Model is loaded
         Then: Uses doclayout-yolo library
         """
-        from src.lib.detectors.figure_detector import FigureDetector
+        from docscalpel.detectors.figure_detector import FigureDetector
 
         detector = FigureDetector(confidence_threshold=0.5)
 
@@ -170,7 +170,7 @@ class TestTableDetector:
 
     def test_table_detector_class_exists(self):
         """Verify TableDetector class is importable."""
-        from src.lib.detectors.table_detector import TableDetector
+        from docscalpel.detectors.table_detector import TableDetector
         assert TableDetector is not None
 
     def test_table_detector_initialization(self):
@@ -181,7 +181,7 @@ class TestTableDetector:
         When: TableDetector is instantiated
         Then: Creates detector with default settings
         """
-        from src.lib.detectors.table_detector import TableDetector
+        from docscalpel.detectors.table_detector import TableDetector
 
         detector = TableDetector(confidence_threshold=0.5)
 
@@ -196,7 +196,7 @@ class TestTableDetector:
         When: detect() is called
         Then: Returns Element objects with type TABLE
         """
-        from src.lib.detectors.table_detector import TableDetector
+        from docscalpel.detectors.table_detector import TableDetector
 
         detector = TableDetector(confidence_threshold=0.5)
 
@@ -215,7 +215,7 @@ class TestTableDetector:
         When: detect() is called with threshold=0.7
         Then: Only returns tables with confidence >= 0.7
         """
-        from src.lib.detectors.table_detector import TableDetector
+        from docscalpel.detectors.table_detector import TableDetector
 
         detector = TableDetector(confidence_threshold=0.7)
 
@@ -233,7 +233,7 @@ class TestTableDetector:
         When: Detection is configured
         Then: Uses DocLayout-YOLO model
         """
-        from src.lib.detectors.table_detector import TableDetector
+        from docscalpel.detectors.table_detector import TableDetector
 
         detector = TableDetector(confidence_threshold=0.5)
 
@@ -258,7 +258,7 @@ class TestTableDetector:
         When: detect() is called
         Then: Returns empty list
         """
-        from src.lib.detectors.table_detector import TableDetector
+        from docscalpel.detectors.table_detector import TableDetector
 
         detector = TableDetector(confidence_threshold=0.5)
 
@@ -273,7 +273,7 @@ class TestEquationDetector:
 
     def test_equation_detector_class_exists(self):
         """Verify EquationDetector class is importable."""
-        from src.lib.detectors.equation_detector import EquationDetector
+        from docscalpel.detectors.equation_detector import EquationDetector
         assert EquationDetector is not None
 
     def test_equation_detector_initialization(self):
@@ -284,7 +284,7 @@ class TestEquationDetector:
         When: EquationDetector is instantiated
         Then: Creates detector with default settings
         """
-        from src.lib.detectors.equation_detector import EquationDetector
+        from docscalpel.detectors.equation_detector import EquationDetector
 
         detector = EquationDetector(confidence_threshold=0.5)
 
@@ -299,7 +299,7 @@ class TestEquationDetector:
         When: detect() is called
         Then: Returns Element objects with type EQUATION
         """
-        from src.lib.detectors.equation_detector import EquationDetector
+        from docscalpel.detectors.equation_detector import EquationDetector
 
         detector = EquationDetector(confidence_threshold=0.5)
 
@@ -318,7 +318,7 @@ class TestEquationDetector:
         When: detect() is called with threshold=0.8
         Then: Only returns equations with confidence >= 0.8
         """
-        from src.lib.detectors.equation_detector import EquationDetector
+        from docscalpel.detectors.equation_detector import EquationDetector
 
         detector = EquationDetector(confidence_threshold=0.8)
 
@@ -336,7 +336,7 @@ class TestEquationDetector:
         When: Detection is configured
         Then: Uses DocLayout-YOLO for equation detection
         """
-        from src.lib.detectors.equation_detector import EquationDetector
+        from docscalpel.detectors.equation_detector import EquationDetector
 
         detector = EquationDetector(confidence_threshold=0.5)
 
@@ -351,7 +351,7 @@ class TestEquationDetector:
         When: detect() is called
         Then: Returns empty list
         """
-        from src.lib.detectors.equation_detector import EquationDetector
+        from docscalpel.detectors.equation_detector import EquationDetector
 
         detector = EquationDetector(confidence_threshold=0.5)
 
@@ -372,9 +372,9 @@ class TestDetectorBaseInterface:
         When: Checking their public methods
         Then: All have detect() method with same signature
         """
-        from src.lib.detectors.figure_detector import FigureDetector
-        from src.lib.detectors.table_detector import TableDetector
-        from src.lib.detectors.equation_detector import EquationDetector
+        from docscalpel.detectors.figure_detector import FigureDetector
+        from docscalpel.detectors.table_detector import TableDetector
+        from docscalpel.detectors.equation_detector import EquationDetector
 
         detectors = [
             FigureDetector(confidence_threshold=0.5),
@@ -395,7 +395,7 @@ class TestDetectorBaseInterface:
         When: detect() is called
         Then: Each element has unique element_id
         """
-        from src.lib.detectors.figure_detector import FigureDetector
+        from docscalpel.detectors.figure_detector import FigureDetector
 
         detector = FigureDetector(confidence_threshold=0.5)
 
@@ -428,7 +428,7 @@ class TestDetectorErrorHandling:
         When: detect() is called
         Then: Raises appropriate error or returns empty list
         """
-        from src.lib.detectors.figure_detector import FigureDetector
+        from docscalpel.detectors.figure_detector import FigureDetector
 
         detector = FigureDetector(confidence_threshold=0.5)
 
@@ -491,7 +491,7 @@ class TestDetectorConfidenceScoring:
         When: detect() is called
         Then: All confidence_score values are in [0.0, 1.0]
         """
-        from src.lib.detectors.figure_detector import FigureDetector
+        from docscalpel.detectors.figure_detector import FigureDetector
 
         detector = FigureDetector(confidence_threshold=0.0)  # Accept all
 
@@ -508,7 +508,7 @@ class TestDetectorConfidenceScoring:
         When: detect() is called with 0.5 and 0.9
         Then: 0.9 threshold returns fewer or equal elements
         """
-        from src.lib.detectors.figure_detector import FigureDetector
+        from docscalpel.detectors.figure_detector import FigureDetector
 
         detector_low = FigureDetector(confidence_threshold=0.5)
         detector_high = FigureDetector(confidence_threshold=0.9)

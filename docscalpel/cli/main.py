@@ -13,7 +13,7 @@ import logging
 from pathlib import Path
 from typing import List
 
-from src.lib import (
+from docscalpel import (
     extract_elements,
     ExtractionConfig,
     ElementType,

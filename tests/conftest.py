@@ -10,7 +10,7 @@ import os
 from pathlib import Path
 from typing import List
 
-from src.lib.models import (
+from docscalpel.models import (
     ElementType,
     BoundingBox,
     Element,

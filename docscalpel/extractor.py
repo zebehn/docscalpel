@@ -50,7 +50,7 @@ def extract_elements(
         ExtractionFailedError: If extraction process fails critically
 
     Example:
-        >>> from src.lib import extract_elements, ExtractionConfig, ElementType
+        >>> from docscalpel import extract_elements, ExtractionConfig, ElementType
         >>> config = ExtractionConfig(element_types=[ElementType.FIGURE])
         >>> result = extract_elements("paper.pdf", config)
         >>> print(f"Extracted {result.figure_count} figures")

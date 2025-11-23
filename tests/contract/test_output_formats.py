@@ -18,14 +18,14 @@ import pytest
 from pathlib import Path
 from typing import Dict, Any
 
-from src.lib.models import (
+from docscalpel.models import (
     ExtractionResult,
     ExtractionConfig,
     Element,
     ElementType,
     BoundingBox,
 )
-from src.cli.formatter import format_json, format_text
+from docscalpel.cli.formatter import format_json, format_text
 
 
 class TestJSONOutputContract:
@@ -197,7 +197,7 @@ class TestJSONOutputContract:
         - errors: array with error messages (non-empty)
         - warnings: array (possibly empty)
         """
-        from src.lib.models import Document
+        from docscalpel.models import Document
 
         document = Document(file_path="missing.pdf", page_count=1)
 
@@ -305,7 +305,7 @@ class TestTextOutputContract:
         """
         Contract: Text output must display error messages when extraction fails.
         """
-        from src.lib.models import Document
+        from docscalpel.models import Document
 
         document = Document(file_path="missing.pdf", page_count=1)
 
@@ -371,7 +371,7 @@ class TestTextOutputContract:
         """
         Contract: Text output must handle case where no elements were detected.
         """
-        from src.lib.models import Document
+        from docscalpel.models import Document
 
         document = Document(file_path="sample.pdf", page_count=1)
 
@@ -401,7 +401,7 @@ class TestTextOutputContract:
 @pytest.fixture
 def sample_extraction_result():
     """Fixture providing a sample extraction result for testing."""
-    from src.lib.models import Document, Page
+    from docscalpel.models import Document, Page
 
     elements = [
         Element(

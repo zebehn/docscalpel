@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
-from src.lib.models import ElementType
+from docscalpel.models import ElementType
 
 
 class TestCLIArgumentParsing:
@@ -25,7 +25,7 @@ class TestCLIArgumentParsing:
 
     def test_cli_main_function_exists(self):
         """Verify CLI main function is importable."""
-        from src.cli.main import main
+        from docscalpel.cli.main import main
         assert callable(main)
 
     def test_cli_with_minimal_args(self, sample_pdf_path, temp_output_dir, capsys):
@@ -36,7 +36,7 @@ class TestCLIArgumentParsing:
         When: CLI is called with minimal arguments
         Then: Extraction runs with defaults, prints results
         """
-        from src.cli.main import main
+        from docscalpel.cli.main import main
 
         test_args = ['pdf-extractor', sample_pdf_path]
 
@@ -60,7 +60,7 @@ class TestCLIArgumentParsing:
         When: CLI is called with --output flag
         Then: Files are created in specified directory
         """
-        from src.cli.main import main
+        from docscalpel.cli.main import main
 
         custom_dir = temp_output_dir / "custom"
         test_args = [
@@ -83,7 +83,7 @@ class TestCLIArgumentParsing:
         When: CLI is called with --types figure
         Then: Only figures are extracted
         """
-        from src.cli.main import main
+        from docscalpel.cli.main import main
 
         test_args = [
             'pdf-extractor',
@@ -105,7 +105,7 @@ class TestCLIArgumentParsing:
         When: CLI is called with --types figure,table,equation
         Then: All types are extracted
         """
-        from src.cli.main import main
+        from docscalpel.cli.main import main
 
         test_args = [
             'pdf-extractor',
@@ -127,7 +127,7 @@ class TestCLIArgumentParsing:
         When: CLI is called with --format json
         Then: Output is valid JSON
         """
-        from src.cli.main import main
+        from docscalpel.cli.main import main
 
         test_args = [
             'pdf-extractor',
@@ -155,7 +155,7 @@ class TestCLIArgumentParsing:
         When: CLI is called with --confidence 0.8
         Then: Extraction uses specified threshold
         """
-        from src.cli.main import main
+        from docscalpel.cli.main import main
 
         test_args = [
             'pdf-extractor',
@@ -177,7 +177,7 @@ class TestCLIArgumentParsing:
         When: CLI is called with --naming-pattern
         Then: Files follow custom naming pattern
         """
-        from src.cli.main import main
+        from docscalpel.cli.main import main
 
         test_args = [
             'pdf-extractor',
@@ -199,7 +199,7 @@ class TestCLIArgumentParsing:
         When: CLI is called with --padding 10
         Then: Extraction uses specified padding
         """
-        from src.cli.main import main
+        from docscalpel.cli.main import main
 
         test_args = [
             'pdf-extractor',
@@ -221,7 +221,7 @@ class TestCLIArgumentParsing:
         When: CLI is called with --max-pages 5
         Then: Only first 5 pages are processed
         """
-        from src.cli.main import main
+        from docscalpel.cli.main import main
 
         test_args = [
             'pdf-extractor',
@@ -243,7 +243,7 @@ class TestCLIArgumentParsing:
         When: CLI is called with --overwrite
         Then: Existing files are overwritten
         """
-        from src.cli.main import main
+        from docscalpel.cli.main import main
 
         test_args = [
             'pdf-extractor',
@@ -269,7 +269,7 @@ class TestCLIErrorHandling:
         When: CLI is called
         Then: Returns error exit code and prints error message
         """
-        from src.cli.main import main
+        from docscalpel.cli.main import main
 
         test_args = [
             'pdf-extractor',
@@ -291,7 +291,7 @@ class TestCLIErrorHandling:
         When: CLI is called with invalid --types value
         Then: Returns error exit code
         """
-        from src.cli.main import main
+        from docscalpel.cli.main import main
 
         test_args = [
             'pdf-extractor',
@@ -313,7 +313,7 @@ class TestCLIErrorHandling:
         When: CLI is called with confidence > 1.0
         Then: Returns error exit code
         """
-        from src.cli.main import main
+        from docscalpel.cli.main import main
 
         test_args = [
             'pdf-extractor',
@@ -339,7 +339,7 @@ class TestCLIOutputFormats:
         When: CLI is called with --format text
         Then: Output follows human-readable format
         """
-        from src.cli.main import main
+        from docscalpel.cli.main import main
 
         test_args = [
             'pdf-extractor',
@@ -365,7 +365,7 @@ class TestCLIOutputFormats:
         When: Called with --help
         Then: Prints help message and exits successfully
         """
-        from src.cli.main import main
+        from docscalpel.cli.main import main
 
         test_args = ['pdf-extractor', '--help']
 
@@ -388,7 +388,7 @@ class TestCLIOutputFormats:
         When: Called with --version
         Then: Prints version and exits successfully
         """
-        from src.cli.main import main
+        from docscalpel.cli.main import main
 
         test_args = ['pdf-extractor', '--version']
 
@@ -415,7 +415,7 @@ class TestCLIVerboseMode:
         When: CLI is called with --verbose
         Then: Detailed logging output is printed
         """
-        from src.cli.main import main
+        from docscalpel.cli.main import main
 
         test_args = [
             'pdf-extractor',

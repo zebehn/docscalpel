@@ -13,7 +13,7 @@ Public API (v1.0.0):
 - Exceptions: All custom exceptions
 
 Example:
-    from src.lib import extract_elements, ExtractionConfig, ElementType
+    from docscalpel import extract_elements, ExtractionConfig, ElementType
 
     config = ExtractionConfig(element_types=[ElementType.FIGURE])
     result = extract_elements("paper.pdf", config)

@@ -27,20 +27,20 @@ setup(
     description="Surgical precision for PDF element extraction - Extract figures, tables, and equations using deep learning",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    author="DocScalpel Team",
-    url="https://github.com/yourusername/docscalpel",
+    author="Minsu Jang",
+    author_email="minsu@etri.re.kr",
+    url="https://github.com/zebehn/docscalpel",
     project_urls={
-        "Documentation": "https://github.com/yourusername/docscalpel/blob/main/README.md",
-        "Source": "https://github.com/yourusername/docscalpel",
-        "Issue Tracker": "https://github.com/yourusername/docscalpel/issues",
+        "Documentation": "https://github.com/zebehn/docscalpel/blob/main/README.md",
+        "Source": "https://github.com/zebehn/docscalpel",
+        "Issue Tracker": "https://github.com/zebehn/docscalpel/issues",
     },
     python_requires=">=3.11",
-    packages=find_packages(where="src"),
-    package_dir={"": "src"},
+    packages=find_packages(exclude=["tests", "tests.*", "fixtures", "docs"]),
     install_requires=requirements,
     entry_points={
         'console_scripts': [
-            'docscalpel=cli.main:main',
+            'docscalpel=docscalpel.cli.main:main',
         ],
     },
     classifiers=[

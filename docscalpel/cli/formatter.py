@@ -7,7 +7,7 @@ Provides JSON and human-readable text formatters for extraction results.
 import json
 from typing import Dict, Any
 
-from src.lib.models import ExtractionResult, Element, ElementType
+from docscalpel.models import ExtractionResult, Element, ElementType
 
 
 def format_json(result: ExtractionResult) -> str:

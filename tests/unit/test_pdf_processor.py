@@ -14,7 +14,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import Mock, patch, MagicMock
 
-from src.lib.models import (
+from docscalpel.models import (
     Document,
     Page,
     ValidationResult,
@@ -30,7 +30,7 @@ class TestValidatePDF:
 
     def test_validate_pdf_function_exists(self):
         """Verify validate_pdf() function is importable."""
-        from src.lib.pdf_processor import validate_pdf
+        from docscalpel.pdf_processor import validate_pdf
         assert callable(validate_pdf)
 
     def test_validate_pdf_with_valid_file_returns_valid(self, sample_pdf_path):
@@ -41,7 +41,7 @@ class TestValidatePDF:
         When: validate_pdf() is called
         Then: Returns ValidationResult with is_valid=True
         """
-        from src.lib.pdf_processor import validate_pdf
+        from docscalpel.pdf_processor import validate_pdf
 
         result = validate_pdf(sample_pdf_path)
 
@@ -60,7 +60,7 @@ class TestValidatePDF:
         When: validate_pdf() is called
         Then: Returns ValidationResult with is_valid=False and error message
         """
-        from src.lib.pdf_processor import validate_pdf
+        from docscalpel.pdf_processor import validate_pdf
 
         missing_file = tmp_path / "does_not_exist.pdf"
 
@@ -79,7 +79,7 @@ class TestValidatePDF:
         When: validate_pdf() is called
         Then: Returns ValidationResult with is_valid=False
         """
-        from src.lib.pdf_processor import validate_pdf
+        from docscalpel.pdf_processor import validate_pdf
 
         text_file = tmp_path / "not_a_pdf.txt"
         text_file.write_text("This is plain text")
@@ -98,7 +98,7 @@ class TestValidatePDF:
         When: validate_pdf() is called
         Then: Returns ValidationResult with is_valid=False
         """
-        from src.lib.pdf_processor import validate_pdf
+        from docscalpel.pdf_processor import validate_pdf
 
         corrupted_pdf = tmp_path / "corrupted.pdf"
         # Write incomplete PDF header
@@ -125,7 +125,7 @@ class TestLoadDocument:
 
     def test_load_document_function_exists(self):
         """Verify load_document() function is importable."""
-        from src.lib.pdf_processor import load_document
+        from docscalpel.pdf_processor import load_document
         assert callable(load_document)
 
     def test_load_document_returns_document_object(self, sample_pdf_path):
@@ -136,7 +136,7 @@ class TestLoadDocument:
         When: load_document() is called
         Then: Returns Document with all required fields
         """
-        from src.lib.pdf_processor import load_document
+        from docscalpel.pdf_processor import load_document
 
         document = load_document(sample_pdf_path)
 
@@ -157,7 +157,7 @@ class TestLoadDocument:
         When: load_document() is called
         Then: Document.pages contains Page objects with correct data
         """
-        from src.lib.pdf_processor import load_document
+        from docscalpel.pdf_processor import load_document
 
         document = load_document(sample_pdf_path)
 
@@ -181,7 +181,7 @@ class TestLoadDocument:
         When: load_document() is called
         Then: Document.metadata contains extracted information
         """
-        from src.lib.pdf_processor import load_document
+        from docscalpel.pdf_processor import load_document
 
         document = load_document(sample_pdf_path)
 
@@ -201,7 +201,7 @@ class TestLoadDocument:
         When: load_document() is called
         Then: Document.file_size_bytes matches actual file size
         """
-        from src.lib.pdf_processor import load_document
+        from docscalpel.pdf_processor import load_document
 
         document = load_document(sample_pdf_path)
 
@@ -220,7 +220,7 @@ class TestLoadDocument:
         When: load_document() is called
         Then: Raises InvalidPDFError
         """
-        from src.lib.pdf_processor import load_document
+        from docscalpel.pdf_processor import load_document
 
         text_file = tmp_path / "not_a_pdf.txt"
         text_file.write_text("This is not a PDF")
@@ -236,7 +236,7 @@ class TestLoadDocument:
         When: load_document() is called
         Then: Raises InvalidPDFError
         """
-        from src.lib.pdf_processor import load_document
+        from docscalpel.pdf_processor import load_document
 
         missing_file = tmp_path / "does_not_exist.pdf"
 
@@ -251,7 +251,7 @@ class TestLoadDocument:
         When: load_document() is called
         Then: Raises CorruptedPDFError
         """
-        from src.lib.pdf_processor import load_document
+        from docscalpel.pdf_processor import load_document
 
         corrupted_pdf = tmp_path / "corrupted.pdf"
         corrupted_pdf.write_bytes(b"%PDF-1.4\n%")
@@ -277,7 +277,7 @@ class TestLoadDocument:
         When: load_document() is called with max_pages=5
         Then: Only first 5 pages are loaded
         """
-        from src.lib.pdf_processor import load_document
+        from docscalpel.pdf_processor import load_document
 
         # Load with page limit
         document = load_document(sample_pdf_path, max_pages=5)
@@ -311,7 +311,7 @@ class TestPDFProcessorEdgeCases:
         When: load_document() is called
         Then: Page.rotation field is set correctly
         """
-        from src.lib.pdf_processor import load_document
+        from docscalpel.pdf_processor import load_document
 
         document = load_document(sample_pdf_path)
 
@@ -337,7 +337,7 @@ class TestPDFProcessorEdgeCases:
         When: validate_pdf() is called
         Then: Returns is_valid=False
         """
-        from src.lib.pdf_processor import validate_pdf
+        from docscalpel.pdf_processor import validate_pdf
 
         empty_file = tmp_path / "empty.pdf"
         empty_file.write_bytes(b"")
@@ -369,7 +369,7 @@ class TestConfigurationValidation:
         When: load_document() is called
         Then: Raises ConfigurationError
         """
-        from src.lib.pdf_processor import load_document
+        from docscalpel.pdf_processor import load_document
 
         with pytest.raises((ConfigurationError, ValueError)):
             load_document(sample_pdf_path, max_pages=-1)
@@ -382,7 +382,7 @@ class TestConfigurationValidation:
         When: load_document() is called
         Then: Raises ConfigurationError or loads all pages
         """
-        from src.lib.pdf_processor import load_document
+        from docscalpel.pdf_processor import load_document
 
         with pytest.raises((ConfigurationError, ValueError)):
             load_document(sample_pdf_path, max_pages=0)
@@ -399,7 +399,7 @@ class TestPDFProcessorIntegrationWithPyMuPDF:
         When: load_document() is called
         Then: Uses fitz (PyMuPDF) library
         """
-        from src.lib.pdf_processor import load_document
+        from docscalpel.pdf_processor import load_document
 
         # This test verifies the implementation uses PyMuPDF
         # by checking that it can handle PyMuPDF-specific features
@@ -417,7 +417,7 @@ class TestPDFProcessorIntegrationWithPyMuPDF:
         When: validate_pdf() is called
         Then: Returns is_valid=False with error message
         """
-        from src.lib.pdf_processor import validate_pdf
+        from docscalpel.pdf_processor import validate_pdf
 
         # Create a file that looks like PDF but isn't valid
         invalid_pdf = tmp_path / "invalid.pdf"

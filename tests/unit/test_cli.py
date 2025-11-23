@@ -14,7 +14,7 @@ import pytest
 import json
 from unittest.mock import Mock, patch
 
-from src.lib.models import (
+from docscalpel.models import (
     ExtractionResult,
     Document,
     Element,
@@ -29,7 +29,7 @@ class TestJSONFormatter:
 
     def test_json_formatter_exists(self):
         """Verify JSON formatter is importable."""
-        from src.cli.formatter import format_json
+        from docscalpel.cli.formatter import format_json
         assert callable(format_json)
 
     def test_format_json_with_success_result(self, sample_extraction_result):
@@ -40,7 +40,7 @@ class TestJSONFormatter:
         When: format_json() is called
         Then: Returns valid JSON string with all fields
         """
-        from src.cli.formatter import format_json
+        from docscalpel.cli.formatter import format_json
 
         json_output = format_json(sample_extraction_result)
 
@@ -62,7 +62,7 @@ class TestJSONFormatter:
         When: format_json() is called
         Then: JSON includes figure_count, table_count, etc.
         """
-        from src.cli.formatter import format_json
+        from docscalpel.cli.formatter import format_json
 
         json_output = format_json(sample_extraction_result)
         result = json.loads(json_output)
@@ -82,7 +82,7 @@ class TestJSONFormatter:
         When: format_json() is called
         Then: JSON includes elements array with details
         """
-        from src.cli.formatter import format_json
+        from docscalpel.cli.formatter import format_json
 
         json_output = format_json(sample_extraction_result)
         result = json.loads(json_output)
@@ -105,7 +105,7 @@ class TestJSONFormatter:
         When: format_json() is called
         Then: JSON includes errors and warnings arrays
         """
-        from src.cli.formatter import format_json
+        from docscalpel.cli.formatter import format_json
 
         result = ExtractionResult(
             document=sample_document,
@@ -130,7 +130,7 @@ class TestTextFormatter:
 
     def test_text_formatter_exists(self):
         """Verify text formatter is importable."""
-        from src.cli.formatter import format_text
+        from docscalpel.cli.formatter import format_text
         assert callable(format_text)
 
     def test_format_text_with_success_result(self, sample_extraction_result):
@@ -141,7 +141,7 @@ class TestTextFormatter:
         When: format_text() is called
         Then: Returns human-readable text summary
         """
-        from src.cli.formatter import format_text
+        from docscalpel.cli.formatter import format_text
 
         text_output = format_text(sample_extraction_result)
 
@@ -160,7 +160,7 @@ class TestTextFormatter:
         When: format_text() is called
         Then: Text includes counts and timing
         """
-        from src.cli.formatter import format_text
+        from docscalpel.cli.formatter import format_text
 
         text_output = format_text(sample_extraction_result)
 
@@ -175,7 +175,7 @@ class TestTextFormatter:
         When: format_text() is called
         Then: Text clearly indicates no elements found
         """
-        from src.cli.formatter import format_text
+        from docscalpel.cli.formatter import format_text
 
         result = ExtractionResult(
             document=sample_document,
@@ -199,7 +199,7 @@ class TestTextFormatter:
         When: format_text() is called
         Then: Text includes error messages
         """
-        from src.cli.formatter import format_text
+        from docscalpel.cli.formatter import format_text
 
         result = ExtractionResult(
             document=sample_document,
@@ -222,7 +222,7 @@ class TestLoggingConfiguration:
 
     def test_logging_setup_exists(self):
         """Verify logging setup function is importable."""
-        from src.cli.logger import setup_logging
+        from docscalpel.cli.logger import setup_logging
         assert callable(setup_logging)
 
     def test_setup_logging_with_verbose_mode(self):
@@ -233,7 +233,7 @@ class TestLoggingConfiguration:
         When: setup_logging() is called
         Then: Logging level is set to DEBUG
         """
-        from src.cli.logger import setup_logging
+        from docscalpel.cli.logger import setup_logging
         import logging
 
         setup_logging(verbose=True)
@@ -250,7 +250,7 @@ class TestLoggingConfiguration:
         When: setup_logging() is called
         Then: Logging level is set to INFO or WARNING
         """
-        from src.cli.logger import setup_logging
+        from docscalpel.cli.logger import setup_logging
         import logging
 
         setup_logging(verbose=False)
@@ -267,7 +267,7 @@ class TestLoggingConfiguration:
         When: Log messages are written
         Then: They appear on stderr, not stdout
         """
-        from src.cli.logger import setup_logging
+        from docscalpel.cli.logger import setup_logging
         import logging
         import sys
 
@@ -291,7 +291,7 @@ class TestArgumentParsing:
         When: parse_element_types() is called
         Then: Returns [ElementType.FIGURE]
         """
-        from src.cli.main import parse_element_types
+        from docscalpel.cli.main import parse_element_types
 
         types = parse_element_types("figure")
 
@@ -306,7 +306,7 @@ class TestArgumentParsing:
         When: parse_element_types() is called
         Then: Returns list with all three types
         """
-        from src.cli.main import parse_element_types
+        from docscalpel.cli.main import parse_element_types
 
         types = parse_element_types("figure,table,equation")
 
@@ -323,7 +323,7 @@ class TestArgumentParsing:
         When: parse_element_types() is called
         Then: Handles spaces correctly
         """
-        from src.cli.main import parse_element_types
+        from docscalpel.cli.main import parse_element_types
 
         types = parse_element_types("figure, table, equation")
 
@@ -337,7 +337,7 @@ class TestArgumentParsing:
         When: parse_element_types() is called
         Then: Raises ValueError
         """
-        from src.cli.main import parse_element_types
+        from docscalpel.cli.main import parse_element_types
 
         with pytest.raises(ValueError):
             parse_element_types("invalid_type")
@@ -350,7 +350,7 @@ class TestArgumentParsing:
         When: validate_confidence() is called
         Then: Returns True
         """
-        from src.cli.main import validate_confidence
+        from docscalpel.cli.main import validate_confidence
 
         assert validate_confidence(0.5) is True
         assert validate_confidence(0.0) is True
@@ -364,7 +364,7 @@ class TestArgumentParsing:
         When: validate_confidence() is called
         Then: Returns False or raises error
         """
-        from src.cli.main import validate_confidence
+        from docscalpel.cli.main import validate_confidence
 
         assert validate_confidence(1.5) is False
         assert validate_confidence(-0.1) is False

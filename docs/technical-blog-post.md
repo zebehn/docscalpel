@@ -932,7 +932,7 @@ Use INT8 quantized model:
 **Basic Usage:**
 
 ```python
-from src.lib import extract_elements, ExtractionConfig, ElementType
+from docscalpel import extract_elements, ExtractionConfig, ElementType
 
 # Extract all element types
 result = extract_elements("paper.pdf")
@@ -967,7 +967,7 @@ for element in result.elements:
 **Error Handling:**
 
 ```python
-from src.lib.models import InvalidPDFError, ExtractionFailedError
+from docscalpel import InvalidPDFError, ExtractionFailedError
 
 try:
     result = extract_elements("paper.pdf", config)
@@ -989,19 +989,19 @@ except ExtractionFailedError as e:
 
 ```bash
 # Extract all elements to current directory
-python -m src.cli.main paper.pdf
+python -m docscalpel paper.pdf
 
 # Specify output directory
-python -m src.cli.main paper.pdf --output ./figures
+python -m docscalpel paper.pdf --output ./figures
 
 # Extract specific types
-python -m src.cli.main paper.pdf --types figure,table
+python -m docscalpel paper.pdf --types figure,table
 ```
 
 **Advanced Options:**
 
 ```bash
-python -m src.cli.main paper.pdf \
+python -m docscalpel paper.pdf \
   --types figure,table,equation \
   --output ./extracted \
   --confidence 0.6 \
@@ -1015,7 +1015,7 @@ python -m src.cli.main paper.pdf \
 **JSON Output:**
 
 ```bash
-python -m src.cli.main paper.pdf --format json > result.json
+python -m docscalpel paper.pdf --format json > result.json
 ```
 
 ```json

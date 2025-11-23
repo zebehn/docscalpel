@@ -53,7 +53,7 @@ cd /path/to/docscalpel
 pip install -r requirements.txt
 
 # 3. Run directly using Python
-python -m src.cli.main paper.pdf
+python -m docscalpel paper.pdf
 ```
 
 ### Method 2: Install with pip (Recommended for Production)
@@ -86,11 +86,11 @@ chmod +x pdf-extractor
 
 ```bash
 # Check version
-python -m src.cli.main --version
+python -m docscalpel --version
 # Output: pdf-extractor 1.0.0
 
 # Show help
-python -m src.cli.main --help
+python -m docscalpel --help
 ```
 
 ---
@@ -102,7 +102,7 @@ python -m src.cli.main --help
 Extract all figures, tables, and equations from a PDF:
 
 ```bash
-python -m src.cli.main paper.pdf
+python -m docscalpel paper.pdf
 ```
 
 **Output**:
@@ -130,19 +130,19 @@ Files created: `figure_01.pdf`, `figure_02.pdf`, ..., `table_01.pdf`, `table_02.
 ### Extract Only Figures
 
 ```bash
-python -m src.cli.main paper.pdf --types figure
+python -m docscalpel paper.pdf --types figure
 ```
 
 ### Extract to Specific Directory
 
 ```bash
-python -m src.cli.main paper.pdf --output ./extracted_elements
+python -m docscalpel paper.pdf --output ./extracted_elements
 ```
 
 ### Get JSON Output
 
 ```bash
-python -m src.cli.main paper.pdf --format json
+python -m docscalpel paper.pdf --format json
 ```
 
 ---
@@ -152,7 +152,7 @@ python -m src.cli.main paper.pdf --format json
 ### Syntax
 
 ```bash
-python -m src.cli.main PDF_FILE [OPTIONS]
+python -m docscalpel PDF_FILE [OPTIONS]
 ```
 
 Or if installed via pip:
@@ -222,7 +222,7 @@ pdf-extractor PDF_FILE [OPTIONS]
 Extract all figures from a research paper:
 
 ```bash
-python -m src.cli.main research_paper.pdf --types figure --output ./figures
+python -m docscalpel research_paper.pdf --types figure --output ./figures
 ```
 
 **Result**: Creates `figures/figure_01.pdf`, `figures/figure_02.pdf`, etc.
@@ -232,7 +232,7 @@ python -m src.cli.main research_paper.pdf --types figure --output ./figures
 Extract tables with custom filename pattern:
 
 ```bash
-python -m src.cli.main paper.pdf \
+python -m docscalpel paper.pdf \
   --types table \
   --output ./tables \
   --naming-pattern "table_{counter:03d}.pdf"
@@ -245,7 +245,7 @@ python -m src.cli.main paper.pdf \
 Extract only high-confidence figures (≥80%):
 
 ```bash
-python -m src.cli.main paper.pdf \
+python -m docscalpel paper.pdf \
   --types figure \
   --confidence 0.8 \
   --output ./high_conf_figures
@@ -256,7 +256,7 @@ python -m src.cli.main paper.pdf \
 Add 10-pixel padding around detected elements:
 
 ```bash
-python -m src.cli.main paper.pdf \
+python -m docscalpel paper.pdf \
   --padding 10 \
   --output ./padded_elements
 ```
@@ -268,7 +268,7 @@ python -m src.cli.main paper.pdf \
 For quick testing or large PDFs:
 
 ```bash
-python -m src.cli.main large_paper.pdf \
+python -m docscalpel large_paper.pdf \
   --max-pages 20 \
   --output ./test_extraction
 ```
@@ -278,7 +278,7 @@ python -m src.cli.main large_paper.pdf \
 Get machine-readable JSON output:
 
 ```bash
-python -m src.cli.main paper.pdf --format json > results.json
+python -m docscalpel paper.pdf --format json > results.json
 ```
 
 **Result**: Creates `results.json` with complete extraction metadata
@@ -288,7 +288,7 @@ python -m src.cli.main paper.pdf --format json > results.json
 Complete extraction with all custom settings:
 
 ```bash
-python -m src.cli.main paper.pdf \
+python -m docscalpel paper.pdf \
   --types figure,table,equation \
   --output ./extracted \
   --naming-pattern "{type}_{counter:02d}.pdf" \
@@ -306,7 +306,7 @@ Process all PDFs in a directory:
 # Bash script
 for pdf in papers/*.pdf; do
   echo "Processing: $pdf"
-  python -m src.cli.main "$pdf" \
+  python -m docscalpel "$pdf" \
     --output "extracted/$(basename "$pdf" .pdf)" \
     --types figure,table
 done
@@ -318,15 +318,15 @@ Extract specific statistics:
 
 ```bash
 # Get element counts
-python -m src.cli.main paper.pdf --format json | \
+python -m docscalpel paper.pdf --format json | \
   jq '.statistics'
 
 # Get only figure count
-python -m src.cli.main paper.pdf --format json | \
+python -m docscalpel paper.pdf --format json | \
   jq '.statistics.figure_count'
 
 # Get list of extracted files
-python -m src.cli.main paper.pdf --format json | \
+python -m docscalpel paper.pdf --format json | \
   jq '.elements[].output_filename'
 ```
 
@@ -335,7 +335,7 @@ python -m src.cli.main paper.pdf --format json | \
 Enable detailed logging to stderr:
 
 ```bash
-python -m src.cli.main paper.pdf --verbose 2> extraction.log
+python -m docscalpel paper.pdf --verbose 2> extraction.log
 ```
 
 **Result**:
@@ -526,7 +526,7 @@ Control detection sensitivity with confidence threshold.
 - ❌ May miss some elements
 
 ```bash
-python -m src.cli.main paper.pdf --confidence 0.9
+python -m docscalpel paper.pdf --confidence 0.9
 ```
 
 **Lower threshold (0.3-0.5)**:
@@ -535,7 +535,7 @@ python -m src.cli.main paper.pdf --confidence 0.9
 - ❌ May include false detections
 
 ```bash
-python -m src.cli.main paper.pdf --confidence 0.3
+python -m docscalpel paper.pdf --confidence 0.3
 ```
 
 **Recommended values**:
@@ -556,7 +556,7 @@ Add extra space around detected elements to avoid cropping.
 
 ```bash
 # Add 10 pixels on all sides
-python -m src.cli.main paper.pdf --padding 10
+python -m docscalpel paper.pdf --padding 10
 ```
 
 **Effect**:
@@ -571,7 +571,7 @@ Process only first N pages for testing or large documents.
 
 ```bash
 # Test on first 10 pages
-python -m src.cli.main huge_paper.pdf --max-pages 10
+python -m docscalpel huge_paper.pdf --max-pages 10
 ```
 
 **Use cases**:
@@ -595,10 +595,10 @@ python -m src.cli.main huge_paper.pdf --max-pages 10
 ls paper.pdf
 
 # Use absolute path
-python -m src.cli.main /full/path/to/paper.pdf
+python -m docscalpel /full/path/to/paper.pdf
 
 # Or relative path from current directory
-python -m src.cli.main ./papers/paper.pdf
+python -m docscalpel ./papers/paper.pdf
 ```
 
 #### 2. "Invalid element type"
@@ -608,10 +608,10 @@ python -m src.cli.main ./papers/paper.pdf
 **Solution**:
 ```bash
 # ❌ Wrong
-python -m src.cli.main paper.pdf --types figures
+python -m docscalpel paper.pdf --types figures
 
 # ✅ Correct
-python -m src.cli.main paper.pdf --types figure
+python -m docscalpel paper.pdf --types figure
 
 # Valid types: figure, table, equation (singular)
 ```
@@ -623,10 +623,10 @@ python -m src.cli.main paper.pdf --types figure
 **Solution**:
 ```bash
 # ❌ Wrong
-python -m src.cli.main paper.pdf --confidence 1.5
+python -m docscalpel paper.pdf --confidence 1.5
 
 # ✅ Correct
-python -m src.cli.main paper.pdf --confidence 0.8
+python -m docscalpel paper.pdf --confidence 0.8
 ```
 
 #### 4. "Output directory is not writable"
@@ -643,7 +643,7 @@ mkdir -p ./output
 chmod 755 ./output
 
 # Or use a different directory
-python -m src.cli.main paper.pdf --output ~/Documents/extracted
+python -m docscalpel paper.pdf --output ~/Documents/extracted
 ```
 
 #### 5. "No elements detected"
@@ -653,10 +653,10 @@ python -m src.cli.main paper.pdf --output ~/Documents/extracted
 **Solutions**:
 ```bash
 # Try lower confidence threshold
-python -m src.cli.main paper.pdf --confidence 0.3
+python -m docscalpel paper.pdf --confidence 0.3
 
 # Enable verbose logging to see what's happening
-python -m src.cli.main paper.pdf --verbose
+python -m docscalpel paper.pdf --verbose
 
 # Check if PDF contains actual figures/tables
 # (Some PDFs may have text-only content)
@@ -676,7 +676,7 @@ pip list | grep -E "PyMuPDF|doclayout"
 
 # Run from project root directory
 cd /path/to/docscalpel
-python -m src.cli.main paper.pdf
+python -m docscalpel paper.pdf
 ```
 
 ### Debug Mode
@@ -684,7 +684,7 @@ python -m src.cli.main paper.pdf
 Enable verbose logging for detailed troubleshooting:
 
 ```bash
-python -m src.cli.main paper.pdf --verbose 2> debug.log
+python -m docscalpel paper.pdf --verbose 2> debug.log
 ```
 
 **Output**: `debug.log` contains detailed execution trace:
@@ -701,7 +701,7 @@ python -m src.cli.main paper.pdf --verbose 2> debug.log
 
 If you encounter issues:
 
-1. **Check the help**: `python -m src.cli.main --help`
+1. **Check the help**: `python -m docscalpel --help`
 2. **Enable verbose mode**: `--verbose`
 3. **Verify input PDF**: Use a different PDF to isolate the issue
 4. **Check dependencies**: Ensure all packages are installed
@@ -715,39 +715,39 @@ If you encounter issues:
 
 1. **Process fewer pages**:
    ```bash
-   python -m src.cli.main paper.pdf --max-pages 20
+   python -m docscalpel paper.pdf --max-pages 20
    ```
 
 2. **Extract single element type**:
    ```bash
    # Faster
-   python -m src.cli.main paper.pdf --types figure
+   python -m docscalpel paper.pdf --types figure
 
    # Slower (processes all types)
-   python -m src.cli.main paper.pdf
+   python -m docscalpel paper.pdf
    ```
 
 3. **Use appropriate confidence threshold**:
    ```bash
    # Higher threshold = faster (fewer elements to process)
-   python -m src.cli.main paper.pdf --confidence 0.8
+   python -m docscalpel paper.pdf --confidence 0.8
    ```
 
 ### Optimize for Accuracy
 
 1. **Lower confidence threshold**:
    ```bash
-   python -m src.cli.main paper.pdf --confidence 0.4
+   python -m docscalpel paper.pdf --confidence 0.4
    ```
 
 2. **Add boundary padding** to avoid cutting off elements:
    ```bash
-   python -m src.cli.main paper.pdf --padding 10
+   python -m docscalpel paper.pdf --padding 10
    ```
 
 3. **Process all pages**:
    ```bash
-   python -m src.cli.main paper.pdf  # No --max-pages limit
+   python -m docscalpel paper.pdf  # No --max-pages limit
    ```
 
 ### Batch Processing Tips
@@ -766,7 +766,7 @@ for pdf in "$INPUT_DIR"/*.pdf; do
     output_dir="$OUTPUT_BASE/$filename"
 
     echo "Processing: $filename"
-    python -m src.cli.main "$pdf" \
+    python -m docscalpel "$pdf" \
         --output "$output_dir" \
         --types figure,table \
         --confidence 0.7 \
@@ -786,16 +786,16 @@ For very large PDFs:
 1. **Use page limiting**:
    ```bash
    # Process in batches of 50 pages
-   python -m src.cli.main large.pdf --max-pages 50
+   python -m docscalpel large.pdf --max-pages 50
    ```
 
 2. **Process one type at a time**:
    ```bash
    # First figures
-   python -m src.cli.main large.pdf --types figure
+   python -m docscalpel large.pdf --types figure
 
    # Then tables
-   python -m src.cli.main large.pdf --types table
+   python -m docscalpel large.pdf --types table
    ```
 
 ---
@@ -813,7 +813,7 @@ The CLI returns different exit codes for automation:
 **Usage in scripts**:
 
 ```bash
-python -m src.cli.main paper.pdf
+python -m docscalpel paper.pdf
 if [ $? -eq 0 ]; then
     echo "Success!"
 else
@@ -828,17 +828,17 @@ fi
 
 ```bash
 # BASIC USAGE
-python -m src.cli.main paper.pdf
+python -m docscalpel paper.pdf
 
 # COMMON OPTIONS
-python -m src.cli.main paper.pdf --types figure,table
-python -m src.cli.main paper.pdf --output ./extracted
-python -m src.cli.main paper.pdf --confidence 0.8
-python -m src.cli.main paper.pdf --format json
-python -m src.cli.main paper.pdf --verbose
+python -m docscalpel paper.pdf --types figure,table
+python -m docscalpel paper.pdf --output ./extracted
+python -m docscalpel paper.pdf --confidence 0.8
+python -m docscalpel paper.pdf --format json
+python -m docscalpel paper.pdf --verbose
 
 # ADVANCED
-python -m src.cli.main paper.pdf \
+python -m docscalpel paper.pdf \
   --types figure,table,equation \
   --output ./extracted \
   --naming-pattern "{type}_{counter:03d}.pdf" \
@@ -850,8 +850,8 @@ python -m src.cli.main paper.pdf \
   --verbose
 
 # INFORMATION
-python -m src.cli.main --help
-python -m src.cli.main --version
+python -m docscalpel --help
+python -m docscalpel --version
 ```
 
 ---

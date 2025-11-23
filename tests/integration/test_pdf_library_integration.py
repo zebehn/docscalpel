@@ -22,8 +22,8 @@ import fitz  # PyMuPDF
 from pathlib import Path
 from unittest.mock import patch
 
-from src.lib.extractor import extract_elements
-from src.lib.models import ExtractionConfig, ElementType
+from docscalpel.extractor import extract_elements
+from docscalpel.models import ExtractionConfig, ElementType
 
 
 class TestPDFLibraryIntegration:
@@ -65,7 +65,7 @@ class TestPDFLibraryIntegration:
 
         Flow: validate_pdf() → PyMuPDF fitz.open() → validation checks
         """
-        from src.lib.pdf_processor import validate_pdf
+        from docscalpel.pdf_processor import validate_pdf
 
         validation_result = validate_pdf(sample_pdf_with_figures)
 
@@ -81,7 +81,7 @@ class TestPDFLibraryIntegration:
 
         Flow: load_document() → PyMuPDF fitz.open() → Document creation
         """
-        from src.lib.pdf_processor import load_document
+        from docscalpel.pdf_processor import load_document
 
         document = load_document(sample_pdf_with_figures)
 
@@ -102,8 +102,8 @@ class TestPDFLibraryIntegration:
 
         Flow: crop_element() → PyMuPDF open() → set_cropbox() → save()
         """
-        from src.lib.cropper import crop_element
-        from src.lib.models import BoundingBox, Element, ElementType
+        from docscalpel.cropper import crop_element
+        from docscalpel.models import BoundingBox, Element, ElementType
 
         # Create test element with bounding box
         bbox = BoundingBox(x=100, y=100, width=200, height=150, page_number=1)
@@ -168,7 +168,7 @@ class TestPDFLibraryIntegration:
 
         Flow: extract_elements() → PyMuPDF error → exception handling
         """
-        from src.lib.models import InvalidPDFError
+        from docscalpel.models import InvalidPDFError
 
         # Create a fake "PDF" that's not actually valid
         fake_pdf_path = os.path.join(temp_output_dir, "fake.pdf")
@@ -195,7 +195,7 @@ class TestPDFLibraryIntegration:
 
         Flow: validate_pdf() → PyMuPDF detects encryption → validation fails
         """
-        from src.lib.pdf_processor import validate_pdf
+        from docscalpel.pdf_processor import validate_pdf
 
         # Create a simple encrypted PDF using PyMuPDF
         encrypted_pdf_path = os.path.join(temp_output_dir, "encrypted.pdf")
@@ -221,7 +221,7 @@ class TestCLIPDFLibraryIntegration:
 
         Flow: CLI main() → parse args → extract_elements() → PyMuPDF → output
         """
-        from src.cli.main import main
+        from docscalpel.cli.main import main
 
         test_args = [
             'pdf-extractor',
@@ -254,7 +254,7 @@ class TestCLIPDFLibraryIntegration:
 
         Flow: CLI main() → extract_elements() → PyMuPDF error → CLI error output
         """
-        from src.cli.main import main
+        from docscalpel.cli.main import main
 
         # Use non-existent file to trigger PyMuPDF error
         test_args = [
@@ -284,7 +284,7 @@ class TestCLIPDFLibraryIntegration:
 
         Flow: CLI → extract_elements() → crop_element() → PyMuPDF save()
         """
-        from src.cli.main import main
+        from docscalpel.cli.main import main
 
         test_args = [
             'pdf-extractor',

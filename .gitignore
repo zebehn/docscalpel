@@ -1,3 +1,7 @@
+# Specify and Claude configuration
+.specify/
+.claude/
+
 # Python
 __pycache__/
 *.py[cod]

@@ -7,7 +7,7 @@
 ## Installation
 
 ```bash
-cd /path/to/figure-extractor
+cd /path/to/docscalpel
 pip install -r requirements.txt
 ```
 

@@ -1258,7 +1258,7 @@ DocScalpel's name reflects its core strength: surgical precision in document ele
 
 The complete implementation is available at:
 ```
-/Users/jangminsu/Development/figure-extractor
+/Users/jangminsu/Development/docscalpel
 ```
 
 With comprehensive documentation:

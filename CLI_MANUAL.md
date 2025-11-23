@@ -47,7 +47,7 @@ PDF Element Extractor is a command-line tool that automatically detects and extr
 
 ```bash
 # 1. Navigate to the project directory
-cd /path/to/figure-extractor
+cd /path/to/docscalpel
 
 # 2. Install dependencies (if not already installed)
 pip install -r requirements.txt
@@ -60,7 +60,7 @@ python -m src.cli.main paper.pdf
 
 ```bash
 # 1. Navigate to the project directory
-cd /path/to/figure-extractor
+cd /path/to/docscalpel
 
 # 2. Install the package
 pip install -e .
@@ -73,7 +73,7 @@ pdf-extractor paper.pdf
 
 ```bash
 # 1. Navigate to the project directory
-cd /path/to/figure-extractor
+cd /path/to/docscalpel
 
 # 2. Make the script executable (Unix/macOS only)
 chmod +x pdf-extractor
@@ -675,7 +675,7 @@ pip install -r requirements.txt
 pip list | grep -E "PyMuPDF|doclayout"
 
 # Run from project root directory
-cd /path/to/figure-extractor
+cd /path/to/docscalpel
 python -m src.cli.main paper.pdf
 ```
 

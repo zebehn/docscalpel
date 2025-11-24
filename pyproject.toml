@@ -1,0 +1,91 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "docscalpel"
+version = "1.0.0"
+description = "Surgical precision for PDF element extraction - Extract figures, tables, and equations using deep learning"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "Minsu Jang", email = "minsu@etri.re.kr"}
+]
+maintainers = [
+    {name = "Minsu Jang", email = "minsu@etri.re.kr"}
+]
+keywords = [
+    "pdf",
+    "extraction",
+    "figures",
+    "tables",
+    "equations",
+    "deep-learning",
+    "yolo",
+    "document-analysis"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Text Processing :: Filters",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [
+    "PyMuPDF>=1.23.0",
+    "pdfplumber>=0.10.0",
+    "doclayout-yolo>=0.0.1",
+    "Pillow>=10.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "mypy>=1.5.0",
+    "black>=23.7.0",
+    "flake8>=6.1.0",
+    "ruff>=0.1.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/zebehn/docscalpel"
+Documentation = "https://github.com/zebehn/docscalpel/blob/main/README.md"
+Repository = "https://github.com/zebehn/docscalpel"
+"Issue Tracker" = "https://github.com/zebehn/docscalpel/issues"
+
+[project.scripts]
+docscalpel = "docscalpel.cli.main:main"
+
+[tool.setuptools]
+packages = ["docscalpel", "docscalpel.cli", "docscalpel.detectors"]
+
+[tool.setuptools.package-data]
+docscalpel = ["py.typed"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+include = '\.pyi?$'
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = "-v --strict-markers"
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false

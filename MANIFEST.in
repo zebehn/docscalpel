@@ -1,0 +1,21 @@
+# Include documentation
+include README.md
+include LICENSE
+recursive-include docs *.md
+
+# Include package data
+include requirements.txt
+include requirements-dev.txt
+
+# Exclude development files
+exclude .gitignore
+recursive-exclude tests *
+recursive-exclude fixtures *
+recursive-exclude .specify *
+recursive-exclude .claude *
+recursive-exclude specs *
+prune tests
+prune fixtures
+prune .specify
+prune .claude
+prune specs

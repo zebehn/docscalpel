@@ -67,12 +67,14 @@ class FigureDetector:
                 )
         return self._model
 
-    def detect(self, page: Page, pdf_path: str = None) -> List[Element]:
+    def detect(self, page: Page, pdf_path: str = None, detect_captions: bool = True) -> List[Element]:
         """
         Detect figures in a PDF page.
 
         Args:
             page: Page object to analyze
+            pdf_path: Path to PDF file (required for rendering)
+            detect_captions: Whether to also detect and store caption bounding boxes
 
         Returns:
             List of Element objects with type FIGURE, filtered by confidence threshold
@@ -90,6 +92,8 @@ class FigureDetector:
             raise ValueError("Page cannot be None")
 
         elements: List[Element] = []
+        # Store caption bboxes temporarily for later processing
+        self._caption_bboxes = []
 
         try:
             logger.debug(
@@ -129,31 +133,31 @@ class FigureDetector:
                         class_id = int(boxes.cls[i])
                         class_name = detections.names[class_id] if hasattr(detections, 'names') else ""
 
-                        # Filter for figures only (class name may vary: "figure", "Figure", etc.)
+                        confidence = float(boxes.conf[i])
+
+                        # Get bounding box coordinates (xyxy format)
+                        bbox_coords = boxes.xyxy[i].cpu().numpy()
+                        x1, y1, x2, y2 = bbox_coords
+
+                        # Scale coordinates back to original PDF dimensions
+                        scale_factor = 1.0 / zoom_factor
+                        x1_scaled = float(x1) * scale_factor
+                        y1_scaled = float(y1) * scale_factor
+                        x2_scaled = float(x2) * scale_factor
+                        y2_scaled = float(y2) * scale_factor
+
+                        # Create BoundingBox with scaled coordinates
+                        bbox = BoundingBox(
+                            x=x1_scaled,
+                            y=y1_scaled,
+                            width=x2_scaled - x1_scaled,
+                            height=y2_scaled - y1_scaled,
+                            page_number=page.page_number,
+                            padding=0
+                        )
+
+                        # Filter for figures (class name may vary: "figure", "Figure", etc.)
                         if class_name.lower() in ['figure', 'fig', 'image', 'picture']:
-                            confidence = float(boxes.conf[i])
-
-                            # Get bounding box coordinates (xyxy format)
-                            bbox_coords = boxes.xyxy[i].cpu().numpy()
-                            x1, y1, x2, y2 = bbox_coords
-
-                            # Scale coordinates back to original PDF dimensions
-                            scale_factor = 1.0 / zoom_factor
-                            x1_scaled = float(x1) * scale_factor
-                            y1_scaled = float(y1) * scale_factor
-                            x2_scaled = float(x2) * scale_factor
-                            y2_scaled = float(y2) * scale_factor
-
-                            # Create BoundingBox with scaled coordinates
-                            bbox = BoundingBox(
-                                x=x1_scaled,
-                                y=y1_scaled,
-                                width=x2_scaled - x1_scaled,
-                                height=y2_scaled - y1_scaled,
-                                page_number=page.page_number,
-                                padding=0
-                            )
-
                             # Create Element
                             element = create_element(
                                 element_type=ElementType.FIGURE,
@@ -170,6 +174,14 @@ class FigureDetector:
                                 f"confidence={confidence:.2f}, bbox=({x1:.0f},{y1:.0f},{x2:.0f},{y2:.0f})"
                             )
 
+                        # Detect captions if requested
+                        elif detect_captions and class_name.lower() in ['figure_caption', 'caption']:
+                            self._caption_bboxes.append((bbox, ElementType.FIGURE))
+                            logger.debug(
+                                f"Detected figure caption on page {page.page_number}: "
+                                f"confidence={confidence:.2f}, bbox=({x1:.0f},{y1:.0f},{x2:.0f},{y2:.0f})"
+                            )
+
             logger.debug(f"Found {len(elements)} figures on page {page.page_number}")
             return elements
 
@@ -177,6 +189,15 @@ class FigureDetector:
             logger.error(f"Detection failed on page {page.page_number}: {e}")
             # Return empty list on failure (graceful degradation)
             return []
+
+    def get_caption_bboxes(self) -> List:
+        """
+        Get detected caption bounding boxes from the last detection.
+
+        Returns:
+            List of tuples (BoundingBox, ElementType) for detected captions
+        """
+        return getattr(self, '_caption_bboxes', [])
 
     def _render_page_to_image(self, pdf_path: str, page_number: int):
         """

@@ -24,6 +24,8 @@ from .models import (
 from .pdf_processor import load_document, validate_pdf
 from .detectors import FigureDetector, TableDetector, EquationDetector
 from .cropper import crop_element
+from .caption_parser import CaptionParser
+from .figure_merger import FigureMerger
 
 logger = logging.getLogger(__name__)
 
@@ -99,6 +101,7 @@ def extract_elements(
         # Step 5: Detect elements across all pages
         logger.info(f"Detecting elements (types: {[str(t) for t in config.element_types]})")
         all_elements: List[Element] = []
+        all_caption_bboxes = []  # Collect caption bboxes for later processing
 
         for page in document.pages:
             logger.debug(f"Processing page {page.page_number}/{len(document.pages)}")
@@ -111,6 +114,19 @@ def extract_elements(
                         f"Detected {len(detected)} {element_type.value}(s) "
                         f"on page {page.page_number}"
                     )
+
+                    # Collect caption bboxes from FigureDetector if available
+                    if hasattr(detector, 'get_caption_bboxes'):
+                        caption_bboxes = detector.get_caption_bboxes()
+                        if caption_bboxes:
+                            all_caption_bboxes.extend([
+                                (bbox, elem_type, page.page_number)
+                                for bbox, elem_type in caption_bboxes
+                            ])
+                            logger.debug(
+                                f"Found {len(caption_bboxes)} caption(s) on page {page.page_number}"
+                            )
+
                 except Exception as e:
                     error_msg = (
                         f"Detection failed for {element_type.value} "
@@ -121,15 +137,54 @@ def extract_elements(
 
         logger.info(f"Total elements detected: {len(all_elements)}")
 
+        # Step 5.5: Merge multi-part figures on the same page
+        if ElementType.FIGURE in config.element_types and len(all_elements) > 1:
+            logger.info("Merging multi-part figures...")
+            merger = FigureMerger(
+                overlap_threshold=0.3,
+                proximity_threshold=20.0,
+                min_confidence=config.confidence_threshold
+            )
+            all_elements = merger.merge_elements(all_elements)
+
         # Step 6: Handle overlapping elements (keep highest confidence)
         if len(config.element_types) > 1:
             all_elements, overlap_warnings = _handle_overlaps(all_elements)
             warnings.extend(overlap_warnings)
 
+        # Step 6.5: Parse captions and associate with elements
+        caption_associations = {}
+        if all_caption_bboxes:
+            logger.info(f"Parsing {len(all_caption_bboxes)} captions...")
+            caption_parser = CaptionParser()
+
+            # Group caption bboxes by page
+            captions_by_page = defaultdict(list)
+            for bbox, elem_type, page_num in all_caption_bboxes:
+                captions_by_page[page_num].append((bbox, elem_type))
+
+            # Extract and parse captions for each page
+            all_captions = []
+            for page_num, page_caption_bboxes in captions_by_page.items():
+                captions = caption_parser.extract_captions_from_page(
+                    pdf_path, page_num, page_caption_bboxes
+                )
+                all_captions.extend(captions)
+
+            # Associate captions with elements
+            if all_captions:
+                caption_associations = caption_parser.associate_captions_with_elements(
+                    all_elements, all_captions, max_distance=100.0
+                )
+                logger.info(
+                    f"Associated {len(caption_associations)} captions with elements"
+                )
+
         # Step 7: Assign sequence numbers and filenames by type
         all_elements = _assign_sequence_numbers_and_filenames(
             all_elements,
-            config.naming_pattern
+            config.naming_pattern,
+            caption_associations
         )
 
         # Step 8: Sort elements by page number and position
@@ -333,20 +388,25 @@ def _elements_overlap(
 
 def _assign_sequence_numbers_and_filenames(
     elements: List[Element],
-    naming_pattern: str
+    naming_pattern: str,
+    caption_associations: Optional[Dict[str, any]] = None
 ) -> List[Element]:
     """
     Assign sequence numbers and generate filenames for elements.
 
-    Each element type gets independent sequential numbering.
+    Uses parsed caption numbers when available, falls back to sequential numbering.
 
     Args:
         elements: List of elements to process
         naming_pattern: Pattern with {type} and {counter} placeholders
+        caption_associations: Optional dict mapping element_id to Caption objects
 
     Returns:
         List of elements with updated sequence_number and output_filename
     """
+    if caption_associations is None:
+        caption_associations = {}
+
     # Group elements by type
     by_type: Dict[ElementType, List[Element]] = defaultdict(list)
     for element in elements:
@@ -361,25 +421,79 @@ def _assign_sequence_numbers_and_filenames(
             key=lambda e: (e.page_number, e.bounding_box.y, e.bounding_box.x)
         )
 
-        # Assign sequential numbers
-        for i, element in enumerate(type_elements, start=1):
-            # Generate filename from pattern
-            filename = naming_pattern.format(
-                type=element_type.value,
-                counter=i
-            )
+        # Build mapping of parsed numbers to elements (if available)
+        elements_with_caption_numbers = {}
+        elements_without_caption_numbers = []
 
-            # Create new element with updated fields
-            updated_element = create_element(
-                element_type=element.element_type,
-                bounding_box=element.bounding_box,
-                page_number=element.page_number,
-                sequence_number=i,
-                confidence_score=element.confidence_score,
-                output_filename=filename
-            )
+        for element in type_elements:
+            if element.element_id in caption_associations:
+                caption = caption_associations[element.element_id]
+                if caption.parsed_number is not None:
+                    elements_with_caption_numbers[caption.parsed_number] = element
+                    logger.debug(
+                        f"Using caption number {caption.parsed_number} for "
+                        f"{element_type.value} on page {element.page_number}"
+                    )
+                else:
+                    elements_without_caption_numbers.append(element)
+            else:
+                elements_without_caption_numbers.append(element)
 
-            updated_elements.append(updated_element)
+        # Assign numbers
+        if elements_with_caption_numbers:
+            # Use caption numbers for elements that have them
+            for parsed_num, element in sorted(elements_with_caption_numbers.items()):
+                filename = naming_pattern.format(
+                    type=element_type.value,
+                    counter=parsed_num
+                )
+
+                updated_element = create_element(
+                    element_type=element.element_type,
+                    bounding_box=element.bounding_box,
+                    page_number=element.page_number,
+                    sequence_number=parsed_num,
+                    confidence_score=element.confidence_score,
+                    output_filename=filename
+                )
+                updated_elements.append(updated_element)
+
+            # Assign sequential numbers to elements without captions
+            # Start from the next available number
+            next_available = max(elements_with_caption_numbers.keys()) + 1
+            for element in elements_without_caption_numbers:
+                filename = naming_pattern.format(
+                    type=element_type.value,
+                    counter=next_available
+                )
+
+                updated_element = create_element(
+                    element_type=element.element_type,
+                    bounding_box=element.bounding_box,
+                    page_number=element.page_number,
+                    sequence_number=next_available,
+                    confidence_score=element.confidence_score,
+                    output_filename=filename
+                )
+                updated_elements.append(updated_element)
+                next_available += 1
+        else:
+            # No caption numbers available, use sequential numbering
+            for i, element in enumerate(type_elements, start=1):
+                filename = naming_pattern.format(
+                    type=element_type.value,
+                    counter=i
+                )
+
+                updated_element = create_element(
+                    element_type=element.element_type,
+                    bounding_box=element.bounding_box,
+                    page_number=element.page_number,
+                    sequence_number=i,
+                    confidence_score=element.confidence_score,
+                    output_filename=filename
+                )
+                updated_elements.append(updated_element)
 
     return updated_elements
 

@@ -95,6 +95,23 @@ class CaptionParser:
                 # Parse figure/table number from text
                 parsed_number = self._parse_number(text, element_type)
 
+                # If no number parsed, try expanding bbox to capture more text
+                if parsed_number is None and element_type == ElementType.FIGURE:
+                    # Expand bbox vertically to capture "Figure X:" that might be just outside
+                    expanded_rect = fitz.Rect(
+                        max(0, bbox.x - 50),
+                        max(0, bbox.y - 50),
+                        bbox.x2 + 50,
+                        bbox.y2 + 50
+                    )
+                    expanded_text = page.get_text("text", clip=expanded_rect).strip()
+                    parsed_number = self._parse_number(expanded_text, element_type)
+                    if parsed_number is not None:
+                        text = expanded_text
+                        logger.debug(
+                            f"Found caption number {parsed_number} with expanded search on page {page_number}"
+                        )
+
                 caption = Caption(
                     text=text,
                     bounding_box=bbox,
@@ -108,6 +125,33 @@ class CaptionParser:
                     f"Extracted caption on page {page_number}: "
                     f"'{text[:50]}...' (number={parsed_number})"
                 )
+
+            # If we have captions without numbers, search entire page for missing figure numbers
+            captions_without_numbers = [c for c in captions if c.parsed_number is None and c.element_type == ElementType.FIGURE]
+            if captions_without_numbers:
+                full_page_text = page.get_text("text")
+
+                # Find all figure numbers in the page
+                found_numbers = []
+                for pattern in self._compiled_patterns[ElementType.FIGURE]:
+                    for match in pattern.finditer(full_page_text):
+                        try:
+                            parsed_num = int(match.group(1))
+                            found_numbers.append(parsed_num)
+                        except ValueError:
+                            pass
+
+                # For each caption without a number, assign the first unused number found
+                used_numbers = set(c.parsed_number for c in captions if c.parsed_number is not None)
+                for caption in captions_without_numbers:
+                    for num in found_numbers:
+                        if num not in used_numbers:
+                            caption.parsed_number = num
+                            used_numbers.add(num)
+                            logger.debug(
+                                f"Found missing caption number {num} via full-page search on page {page_number}"
+                            )
+                            break
 
             doc.close()
 
@@ -169,7 +213,7 @@ class CaptionParser:
 
         for element in elements:
             best_caption = None
-            best_distance = float('inf')
+            best_score = float('inf')
 
             for caption in captions:
                 # Only match captions of the same type on the same page
@@ -177,11 +221,28 @@ class CaptionParser:
                     caption.page_number != element.page_number):
                     continue
 
+                # Skip captions without parsed numbers (likely labels, not actual captions)
+                if caption.parsed_number is None:
+                    continue
+
                 # Calculate distance between element and caption
                 distance = self._calculate_distance(element.bounding_box, caption.bounding_box)
 
-                if distance < best_distance and distance < max_distance:
-                    best_distance = distance
+                # Skip if beyond max distance
+                if distance >= max_distance:
+                    continue
+
+                # Compute score: prefer captions below figures over overlapping/above
+                score = distance
+                if self._is_caption_below(element.bounding_box, caption.bounding_box):
+                    # Caption below figure (ideal position) - use actual distance
+                    score = distance
+                else:
+                    # Caption overlaps or above - add penalty
+                    score = distance + 500.0
+
+                if score < best_score:
+                    best_score = score
                     best_caption = caption
 
             if best_caption:
@@ -192,6 +253,19 @@ class CaptionParser:
                 )
 
         return associations
+
+    def _is_caption_below(self, element_bbox: BoundingBox, caption_bbox: BoundingBox) -> bool:
+        """
+        Check if caption is positioned below the element.
+
+        Args:
+            element_bbox: Element bounding box
+            caption_bbox: Caption bounding box
+
+        Returns:
+            True if caption is below element
+        """
+        return element_bbox.y2 <= caption_bbox.y
 
     def _calculate_distance(self, bbox1: BoundingBox, bbox2: BoundingBox) -> float:
         """

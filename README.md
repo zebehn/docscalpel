@@ -28,7 +28,9 @@ A Python library and CLI application for detecting and extracting figures, table
 - **Extract figures, tables, and equations** from academic PDFs with surgical precision
 - **Deep learning powered** using state-of-the-art DocLayout-YOLO model
 - **High accuracy** detection with configurable confidence thresholds
-- **Sequential numbering** with zero-padding (figure_01.pdf, table_01.pdf, etc.)
+- **Smart numbering** - caption-based numbering (extracts "Figure 6" → figure_06.pdf) with sequential fallback
+- **Multi-part figure merging** - automatically combines overlapping or closely-related figure detections
+- **Caption parsing** - extracts figure/table numbers from captions for accurate naming
 - **Multiple element types** in single pass with overlap resolution
 - **Custom output** configuration (directory, naming patterns, boundary padding)
 - **Library-first architecture** - use as Python library or CLI tool
@@ -95,10 +97,13 @@ python -m docscalpel --help
 DocScalpel combines state-of-the-art deep learning with robust PDF processing:
 
 1. **PDF Rendering**: Pages rendered at 2x resolution for optimal detection
-2. **DocLayout-YOLO Detection**: Specialized YOLO model trained on 300K+ documents
-3. **Coordinate Transformation**: Precise scaling from image to PDF coordinates
-4. **Overlap Resolution**: NMS algorithm keeps highest-confidence elements
-5. **Precise Extraction**: Vector-preserving PDF cropping
+2. **DocLayout-YOLO Detection**: Specialized YOLO model trained on 300K+ documents detects figures and captions
+3. **Caption Parsing**: Extracts text from detected captions and parses figure/table numbers (e.g., "Figure 6" → 6)
+4. **Multi-part Figure Merging**: Combines overlapping (IoU ≥ 0.3) or nearby (distance ≤ 20pt) detections into single figures
+5. **Coordinate Transformation**: Precise scaling from image to PDF coordinates
+6. **Smart Numbering**: Uses parsed caption numbers when available, falls back to sequential numbering
+7. **Overlap Resolution**: Keeps highest-confidence elements when different types overlap
+8. **Precise Extraction**: Vector-preserving PDF cropping
 
 ## Architecture
 
@@ -118,6 +123,8 @@ docscalpel/
 ├── models.py           # Data models
 ├── pdf_processor.py    # PDF parsing
 ├── cropper.py          # PDF cropping
+├── caption_parser.py   # Caption text extraction and parsing
+├── figure_merger.py    # Multi-part figure merging
 ├── detectors/          # Element detection
 │   ├── figure_detector.py
 │   ├── table_detector.py

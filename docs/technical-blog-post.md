@@ -4,8 +4,8 @@
 
 **Author**: Minsu Jang (Electronics and Telecommunications Research Institute)
 **Date**: November 20, 2025
-**Last Updated**: November 23, 2025 - Package restructuring and API improvements
-**Topics**: Document Analysis, Computer Vision, PDF Processing, Deep Learning
+**Last Updated**: December 30, 2025 - Caption parsing and multi-part figure merging
+**Topics**: Document Analysis, Computer Vision, PDF Processing, Deep Learning, NLP
 
 ---
 
@@ -36,6 +36,8 @@ DocScalpel provides surgical precision in extracting visual elements from PDFs, 
 
 - **Multi-element detection**: Figures, tables, and equations
 - **High accuracy**: Leverages DocLayout-YOLO trained on 300K+ synthetic documents
+- **Caption-based numbering**: Automatically extracts and parses figure numbers from captions (e.g., "Figure 6" → figure_06.pdf)
+- **Multi-part figure merging**: Intelligently combines overlapping or closely-related figure detections
 - **Production-ready**: Comprehensive error handling, logging, and validation
 - **Library-first design**: Reusable Python library with optional CLI
 - **Configurable**: Confidence thresholds, output formats, naming patterns
@@ -106,6 +108,7 @@ The system follows a **pipeline architecture** with clear separation of concerns
 │               v                      │
 │  ┌────────────────────────────────┐ │
 │  │  DocLayout-YOLO Inference     │ │
+│  │  - Detects figures & captions │ │
 │  └────────────┬───────────────────┘ │
 │               │                      │
 │               v                      │
@@ -114,17 +117,34 @@ The system follows a **pipeline architecture** with clear separation of concerns
 │  │  - Coordinate scaling          │ │
 │  │  - Confidence filtering        │ │
 │  │  - Element classification      │ │
+│  │  - Caption bbox storage        │ │
 │  └────────────┬───────────────────┘ │
 └───────────────┼──────────────────────┘
                 │
                 v
 ┌──────────────────────────┐
-│   Overlap Resolution    │  ← Keep highest confidence when overlapping
+│  Multi-part Figure      │  ← Merge overlapping/nearby figures (IoU ≥ 0.3, dist ≤ 20pt)
+│      Merging            │
 └──────────┬───────────────┘
            │
            v
 ┌──────────────────────────┐
-│  Sequence Assignment    │  ← Number elements by type (figure_01, table_01)
+│   Caption Parsing       │  ← Extract text from caption regions, parse numbers
+└──────────┬───────────────┘
+           │
+           v
+┌──────────────────────────┐
+│   Caption Association   │  ← Match captions to elements by proximity
+└──────────┬───────────────┘
+           │
+           v
+┌──────────────────────────┐
+│   Overlap Resolution    │  ← Keep highest confidence when different types overlap
+└──────────┬───────────────┘
+           │
+           v
+┌──────────────────────────┐
+│  Smart Numbering        │  ← Use caption numbers (e.g., "Figure 6" → 06) or sequential
 └──────────┬───────────────┘
            │
            v
@@ -148,8 +168,10 @@ docscalpel/
 ├── pdf_processor.py              # PDF loading and validation
 ├── extractor.py                  # Main orchestrator
 ├── cropper.py                    # PDF region extraction
+├── caption_parser.py             # Caption text extraction and number parsing
+├── figure_merger.py              # Multi-part figure merging logic
 ├── detectors/
-│   ├── figure_detector.py        # Figure detection with DocLayout-YOLO
+│   ├── figure_detector.py        # Figure & caption detection with DocLayout-YOLO
 │   ├── table_detector.py         # Table detection
 │   └── equation_detector.py      # Equation detection
 └── cli/
@@ -518,7 +540,186 @@ if class_name.lower() in ['equation', 'formula', 'math']:
 
 **Design Decision**: Keep class name filtering flexible to accommodate model variations.
 
-### Phase 3: Overlap Resolution
+### Phase 2.5: Multi-part Figure Merging
+
+Academic papers often contain multi-part figures (e.g., Figure 1a, 1b) that the model may detect as separate elements. We merge these into single figures.
+
+**Algorithm**: Iterative merging based on overlap (IoU) and proximity
+
+```python
+class FigureMerger:
+    def __init__(self, overlap_threshold=0.3, proximity_threshold=20.0):
+        self.overlap_threshold = overlap_threshold
+        self.proximity_threshold = proximity_threshold
+
+    def merge_elements(self, elements: List[Element]) -> List[Element]:
+        """Merge overlapping or closely-related figures."""
+
+        # Group by page and type
+        by_page_type = defaultdict(list)
+        for element in elements:
+            key = (element.page_number, element.element_type)
+            by_page_type[key].append(element)
+
+        merged_elements = []
+
+        for (page, elem_type), page_elements in by_page_type.items():
+            # Sort by confidence
+            sorted_elements = sorted(page_elements,
+                                   key=lambda e: e.confidence_score,
+                                   reverse=True)
+
+            merged = []
+            used = set()
+
+            for i, elem1 in enumerate(sorted_elements):
+                if i in used:
+                    continue
+
+                # Find all elements to merge with elem1
+                to_merge = [elem1]
+                used.add(i)
+
+                for j, elem2 in enumerate(sorted_elements):
+                    if j in used or j <= i:
+                        continue
+
+                    # Check overlap or proximity
+                    if self._should_merge(elem1, elem2):
+                        to_merge.append(elem2)
+                        used.add(j)
+
+                # Create merged element
+                if len(to_merge) > 1:
+                    merged_elem = self._create_merged_element(to_merge)
+                else:
+                    merged_elem = elem1
+
+                merged.append(merged_elem)
+
+            merged_elements.extend(merged)
+
+        return merged_elements
+
+    def _should_merge(self, elem1, elem2):
+        """Check if elements should be merged."""
+        iou = calculate_iou(elem1.bounding_box, elem2.bounding_box)
+        if iou >= self.overlap_threshold:
+            return True
+
+        distance = self._calculate_min_distance(elem1.bounding_box,
+                                                elem2.bounding_box)
+        return distance <= self.proximity_threshold
+
+    def _create_merged_element(self, elements):
+        """Create merged element with minimum bounding rectangle."""
+        min_x = min(e.bounding_box.x for e in elements)
+        min_y = min(e.bounding_box.y for e in elements)
+        max_x = max(e.bounding_box.x2 for e in elements)
+        max_y = max(e.bounding_box.y2 for e in elements)
+
+        merged_bbox = BoundingBox(
+            x=min_x, y=min_y,
+            width=max_x - min_x,
+            height=max_y - min_y,
+            page_number=elements[0].page_number
+        )
+
+        max_confidence = max(e.confidence_score for e in elements)
+
+        return replace(elements[0],
+                      bounding_box=merged_bbox,
+                      confidence_score=max_confidence)
+```
+
+**Key Parameters**:
+- `overlap_threshold=0.3`: IoU threshold for overlapping figures
+- `proximity_threshold=20.0`: Distance threshold (in points) for nearby figures
+
+### Phase 2.75: Caption Parsing and Association
+
+The system extracts figure numbers from captions to ensure output filenames match paper numbering.
+
+**Algorithm**: Text extraction → Regex parsing → Proximity-based association
+
+```python
+class CaptionParser:
+    FIGURE_PATTERNS = [
+        r'(?:Figure|Fig\.?|FIGURE)\s*(\d+)',  # "Figure 6"
+        r'(?:Figure|Fig\.?|FIGURE)\s*([A-Z])',  # "Figure A"
+    ]
+
+    def extract_captions_from_page(self, pdf_path, page_number, caption_bboxes):
+        """Extract text from caption bounding boxes."""
+        captions = []
+
+        doc = fitz.open(pdf_path)
+        page = doc[page_number - 1]
+
+        for bbox, elem_type in caption_bboxes:
+            # Extract text from bbox region
+            rect = fitz.Rect(bbox.x, bbox.y, bbox.x2, bbox.y2)
+            text = page.get_text("text", clip=rect).strip()
+
+            # Parse figure number
+            parsed_number = self._parse_number(text, elem_type)
+
+            captions.append(Caption(
+                text=text,
+                bounding_box=bbox,
+                page_number=page_number,
+                element_type=elem_type,
+                parsed_number=parsed_number
+            ))
+
+        doc.close()
+        return captions
+
+    def _parse_number(self, text, element_type):
+        """Parse number from caption text."""
+        for pattern in self.FIGURE_PATTERNS:
+            match = re.search(pattern, text, re.IGNORECASE)
+            if match:
+                number_str = match.group(1)
+                try:
+                    return int(number_str)
+                except ValueError:
+                    # Handle letter-based numbering (A=1, B=2)
+                    if number_str.isalpha():
+                        return ord(number_str.upper()) - ord('A') + 1
+        return None
+
+    def associate_captions_with_elements(self, elements, captions, max_distance=100.0):
+        """Match captions to elements by proximity."""
+        associations = {}
+
+        for element in elements:
+            best_caption = None
+            best_distance = float('inf')
+
+            for caption in captions:
+                # Only match same type on same page
+                if (caption.element_type != element.element_type or
+                    caption.page_number != element.page_number):
+                    continue
+
+                # Calculate vertical distance (captions usually below figures)
+                distance = self._calculate_distance(element.bounding_box,
+                                                    caption.bounding_box)
+
+                if distance < best_distance and distance < max_distance:
+                    best_distance = distance
+                    best_caption = caption
+
+            if best_caption:
+                associations[element.element_id] = best_caption
+
+        return associations
+```
+
+**Example**: "Figure 6. Scatter plot showing..." → parsed_number=6 → figure_06.pdf
+
+### Phase 3: Cross-type Overlap Resolution
 
 When detecting multiple element types, some may overlap (e.g., a table detected as both "table" and "figure").
 
@@ -579,13 +780,13 @@ def calculate_iou(bbox1, bbox2):
 - Too low (0.3): Removes valid adjacent elements
 - Too high (0.7): Keeps true duplicates
 
-### Phase 4: Sequence Assignment
+### Phase 4: Smart Numbering with Caption Awareness
 
-Elements are numbered sequentially within each type:
+Elements are numbered using parsed caption numbers when available, with sequential fallback.
 
 ```python
-def _assign_sequence_numbers_and_filenames(elements, naming_pattern):
-    """Assign sequence numbers and generate filenames."""
+def _assign_sequence_numbers_and_filenames(elements, naming_pattern, caption_associations):
+    """Assign sequence numbers and generate filenames with caption awareness."""
 
     # Group by element type
     by_type = defaultdict(list)
@@ -595,37 +796,86 @@ def _assign_sequence_numbers_and_filenames(elements, naming_pattern):
     updated_elements = []
 
     for element_type, type_elements in by_type.items():
-        # Sort by page, then position (top-to-bottom, left-to-right)
+        # Sort by page, then position
         type_elements.sort(
             key=lambda e: (e.page_number, e.bounding_box.y, e.bounding_box.x)
         )
 
-        # Assign sequential numbers
-        for i, element in enumerate(type_elements, start=1):
-            filename = naming_pattern.format(
-                type=element_type.value,  # "figure", "table", "equation"
-                counter=i                  # 1, 2, 3, ...
-            )
+        # Separate elements with/without caption numbers
+        elements_with_captions = {}
+        elements_without_captions = []
 
-            # Create new element with updated fields
-            updated_element = create_element(
-                element_type=element.element_type,
-                bounding_box=element.bounding_box,
-                page_number=element.page_number,
-                sequence_number=i,
-                confidence_score=element.confidence_score,
-                output_filename=filename
-            )
+        for element in type_elements:
+            if element.element_id in caption_associations:
+                caption = caption_associations[element.element_id]
+                if caption.parsed_number is not None:
+                    elements_with_captions[caption.parsed_number] = element
+                else:
+                    elements_without_captions.append(element)
+            else:
+                elements_without_captions.append(element)
 
-            updated_elements.append(updated_element)
+        # Assign numbers
+        if elements_with_captions:
+            # Use caption numbers for elements that have them
+            for parsed_num, element in sorted(elements_with_captions.items()):
+                filename = naming_pattern.format(
+                    type=element_type.value,
+                    counter=parsed_num
+                )
+                updated_element = create_element(
+                    element_type=element.element_type,
+                    bounding_box=element.bounding_box,
+                    page_number=element.page_number,
+                    sequence_number=parsed_num,
+                    confidence_score=element.confidence_score,
+                    output_filename=filename
+                )
+                updated_elements.append(updated_element)
+
+            # Sequential numbering for elements without captions
+            next_available = max(elements_with_captions.keys()) + 1
+            for element in elements_without_captions:
+                filename = naming_pattern.format(
+                    type=element_type.value,
+                    counter=next_available
+                )
+                updated_element = create_element(
+                    element_type=element.element_type,
+                    bounding_box=element.bounding_box,
+                    page_number=element.page_number,
+                    sequence_number=next_available,
+                    confidence_score=element.confidence_score,
+                    output_filename=filename
+                )
+                updated_elements.append(updated_element)
+                next_available += 1
+        else:
+            # No captions found - use sequential numbering
+            for i, element in enumerate(type_elements, start=1):
+                filename = naming_pattern.format(
+                    type=element_type.value,
+                    counter=i
+                )
+                updated_element = create_element(
+                    element_type=element.element_type,
+                    bounding_box=element.bounding_box,
+                    page_number=element.page_number,
+                    sequence_number=i,
+                    confidence_score=element.confidence_score,
+                    output_filename=filename
+                )
+                updated_elements.append(updated_element)
 
     return updated_elements
 ```
 
-**Naming Pattern**: `"{type}_{counter:02d}.pdf"` produces:
-- `figure_01.pdf`, `figure_02.pdf`, ...
-- `table_01.pdf`, `table_02.pdf`, ...
-- `equation_01.pdf`, `equation_02.pdf`, ...
+**Naming Examples**:
+- With captions: "Figure 6" → `figure_06.pdf`, "Figure 8" → `figure_08.pdf`
+- Without captions: `figure_09.pdf`, `figure_10.pdf` (sequential after highest caption number)
+- Fallback (no captions detected): `figure_01.pdf`, `figure_02.pdf`, ...
+
+**Default Pattern**: `"{type}_{counter:02d}.pdf"` produces zero-padded filenames
 
 ### Phase 5: Element Cropping
 

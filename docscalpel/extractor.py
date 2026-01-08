@@ -174,7 +174,7 @@ def extract_elements(
             # Associate captions with elements
             if all_captions:
                 caption_associations = caption_parser.associate_captions_with_elements(
-                    all_elements, all_captions, max_distance=100.0
+                    all_elements, all_captions, max_distance=100.0, pdf_path=pdf_path
                 )
                 logger.info(
                     f"Associated {len(caption_associations)} captions with elements"

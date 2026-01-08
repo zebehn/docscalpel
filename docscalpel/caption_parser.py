@@ -196,7 +196,8 @@ class CaptionParser:
         self,
         elements: List,
         captions: List[Caption],
-        max_distance: float = 100.0
+        max_distance: float = 100.0,
+        pdf_path: Optional[str] = None
     ) -> Dict[str, Caption]:
         """
         Associate captions with their corresponding elements based on proximity.
@@ -252,7 +253,159 @@ class CaptionParser:
                     f"with caption (number={best_caption.parsed_number})"
                 )
 
+        # Post-process: detect and fix cases where multiple elements share same caption
+        associations = self._fix_shared_captions(elements, captions, associations, pdf_path)
+
         return associations
+
+    def _fix_shared_captions(
+        self,
+        elements: List,
+        captions: List[Caption],
+        associations: Dict[str, Caption],
+        pdf_path: Optional[str] = None
+    ) -> Dict[str, Caption]:
+        """
+        Fix cases where multiple elements are incorrectly associated with the same caption.
+
+        This happens when YOLO misses some caption detections, causing all subfigures
+        to be associated with a single caption.
+
+        Args:
+            elements: List of detected elements
+            captions: List of detected captions
+            associations: Current associations mapping element_id to Caption
+
+        Returns:
+            Updated associations dictionary
+        """
+        if not associations:
+            return associations
+
+        # Group elements by page and type
+        from collections import defaultdict
+        by_page_type = defaultdict(list)
+        for element in elements:
+            key = (element.page_number, element.element_type)
+            by_page_type[key].append(element)
+
+        for (page_num, elem_type), page_elements in by_page_type.items():
+            # Count how many elements share each caption number
+            caption_usage = defaultdict(list)
+            for element in page_elements:
+                if element.element_id in associations:
+                    caption_num = associations[element.element_id].parsed_number
+                    caption_usage[caption_num].append(element)
+
+            # Find captions that are shared by multiple elements
+            for caption_num, shared_elements in caption_usage.items():
+                if len(shared_elements) <= 1:
+                    continue  # No sharing, skip
+
+                # Multiple elements share this caption - search for missing numbers
+                logger.debug(
+                    f"Found {len(shared_elements)} elements sharing caption {caption_num} "
+                    f"on page {page_num}"
+                )
+
+                # Get all caption numbers already found on this page
+                page_captions = [c for c in captions if c.page_number == page_num and c.element_type == elem_type]
+                used_numbers = set(c.parsed_number for c in page_captions if c.parsed_number is not None)
+
+                # Search for missing figure numbers in the expected range
+                expected_numbers = list(range(caption_num, caption_num + len(shared_elements)))
+                missing_numbers = [n for n in expected_numbers if n not in used_numbers]
+
+                if not missing_numbers and pdf_path:
+                    # Try searching full page for any figure numbers
+                    missing_numbers = self._search_missing_numbers_on_page(
+                        pdf_path,
+                        page_num,
+                        elem_type,
+                        used_numbers,
+                        caption_num,
+                        len(shared_elements)
+                    )
+
+                if missing_numbers:
+                    # Sort elements by vertical position (top to bottom)
+                    sorted_elements = sorted(shared_elements, key=lambda e: e.bounding_box.y)
+
+                    # Create synthetic captions for missing numbers
+                    for i, missing_num in enumerate(missing_numbers[:len(sorted_elements)-1]):
+                        if i + 1 < len(sorted_elements):
+                            element = sorted_elements[i + 1]
+
+                            # Create synthetic caption
+                            synthetic_caption = Caption(
+                                text=f"Figure {missing_num}: (synthetic - YOLO missed detection)",
+                                bounding_box=element.bounding_box,  # Use element bbox as placeholder
+                                page_number=page_num,
+                                element_type=elem_type,
+                                parsed_number=missing_num
+                            )
+
+                            # Update association
+                            associations[element.element_id] = synthetic_caption
+                            logger.info(
+                                f"Created synthetic caption {missing_num} for element on page {page_num} "
+                                f"(YOLO missed detection)"
+                            )
+
+        return associations
+
+    def _search_missing_numbers_on_page(
+        self,
+        pdf_path: str,
+        page_num: int,
+        elem_type: ElementType,
+        used_numbers: set,
+        start_num: int,
+        count: int
+    ) -> List[int]:
+        """
+        Search page text for missing figure numbers.
+
+        Args:
+            pdf_path: Path to PDF file
+            page_num: Page number to search
+            elem_type: Element type
+            used_numbers: Set of already-used numbers
+            start_num: Starting figure number
+            count: Number of figures
+
+        Returns:
+            List of missing figure numbers found on page
+        """
+        missing = []
+
+        try:
+            import fitz
+            doc = fitz.open(pdf_path)
+            page = doc[page_num - 1]  # Convert to 0-indexed
+            text = page.get_text("text")
+
+            # Search for figure numbers in expected range
+            if elem_type not in self._compiled_patterns:
+                doc.close()
+                return missing
+
+            for pattern in self._compiled_patterns[elem_type]:
+                for match in pattern.finditer(text):
+                    try:
+                        num = int(match.group(1))
+                        # Only include numbers in expected range that aren't already used
+                        if start_num <= num < start_num + count and num not in used_numbers:
+                            missing.append(num)
+                    except ValueError:
+                        pass
+
+            doc.close()
+
+        except Exception as e:
+            logger.error(f"Failed to search for missing numbers on page {page_num}: {e}")
+
+        return sorted(set(missing))  # Remove duplicates and sort
 
     def _is_caption_below(self, element_bbox: BoundingBox, caption_bbox: BoundingBox) -> bool:
         """

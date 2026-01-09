@@ -135,6 +135,73 @@ class FigureMerger:
 
         return merged
 
+    def merge_by_shared_captions(
+        self,
+        elements: List[Element],
+        caption_associations: dict
+    ) -> tuple[List[Element], dict]:
+        """
+        Merge elements that share the same caption on the same page.
+
+        This handles the case where subfigures (a, b, c) are detected as
+        separate figures but share a single caption like "Figure 7".
+
+        Args:
+            elements: List of detected elements
+            caption_associations: Dict mapping element_id to Caption objects
+
+        Returns:
+            Tuple of (merged elements list, updated caption associations dict)
+        """
+        if not elements or not caption_associations:
+            return elements, caption_associations
+
+        # Group elements by page and caption number
+        from collections import defaultdict
+        by_page_caption = defaultdict(list)
+
+        for element in elements:
+            if element.element_id in caption_associations:
+                caption = caption_associations[element.element_id]
+                if caption.parsed_number is not None:
+                    key = (element.page_number, element.element_type, caption.parsed_number)
+                    by_page_caption[key].append(element)
+
+        # Merge groups that have multiple elements
+        merged_elements = []
+        processed_ids = set()
+        updated_associations = {}
+
+        for (page_num, elem_type, caption_num), group_elements in by_page_caption.items():
+            if len(group_elements) > 1:
+                # Multiple elements share this caption - merge them
+                merged_elem = self._create_merged_element(group_elements)
+                merged_elements.append(merged_elem)
+
+                # Update caption association for the merged element
+                # Use the caption from the first element
+                caption = caption_associations[group_elements[0].element_id]
+                updated_associations[merged_elem.element_id] = caption
+
+                # Mark all elements in this group as processed
+                for elem in group_elements:
+                    processed_ids.add(elem.element_id)
+
+                logger.info(
+                    f"Merged {len(group_elements)} {elem_type.value}(s) sharing "
+                    f"caption {caption_num} on page {page_num}"
+                )
+
+        # Add elements that weren't merged (don't share captions)
+        for element in elements:
+            if element.element_id not in processed_ids:
+                merged_elements.append(element)
+                # Preserve caption association if it exists
+                if element.element_id in caption_associations:
+                    updated_associations[element.element_id] = caption_associations[element.element_id]
+
+        return merged_elements, updated_associations
+
     def _should_merge(self, elem1: Element, elem2: Element) -> bool:
         """
         Determine if two elements should be merged.

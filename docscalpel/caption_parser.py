@@ -126,12 +126,12 @@ class CaptionParser:
                     f"'{text[:50]}...' (number={parsed_number})"
                 )
 
-            # If we have captions without numbers, search entire page for missing figure numbers
+            # Handle captions without numbers by searching the page
             captions_without_numbers = [c for c in captions if c.parsed_number is None and c.element_type == ElementType.FIGURE]
-            if captions_without_numbers:
+            if captions_without_numbers and caption_bboxes:
                 full_page_text = page.get_text("text")
 
-                # Find all figure numbers in the page
+                # Find all figure numbers mentioned on the page
                 found_numbers = []
                 for pattern in self._compiled_patterns[ElementType.FIGURE]:
                     for match in pattern.finditer(full_page_text):
@@ -141,7 +141,7 @@ class CaptionParser:
                         except ValueError:
                             pass
 
-                # For each caption without a number, assign the first unused number found
+                # Assign numbers to captions without numbers
                 used_numbers = set(c.parsed_number for c in captions if c.parsed_number is not None)
                 for caption in captions_without_numbers:
                     for num in found_numbers:
@@ -149,7 +149,7 @@ class CaptionParser:
                             caption.parsed_number = num
                             used_numbers.add(num)
                             logger.debug(
-                                f"Found missing caption number {num} via full-page search on page {page_number}"
+                                f"Assigned number {num} to caption without number via full-page search on page {page_number}"
                             )
                             break
 
@@ -212,11 +212,58 @@ class CaptionParser:
         """
         associations = {}
 
+        # Separate real captions from synthetic ones (synthetic have bbox at 0,0,1,1)
+        real_captions = [c for c in captions if not (c.bounding_box.width == 1 and c.bounding_box.height == 1)]
+        synthetic_captions = [c for c in captions if c.bounding_box.width == 1 and c.bounding_box.height == 1]
+
+        # Group elements and captions by page to handle multi-figure pages specially
+        from collections import defaultdict
+        elements_by_page = defaultdict(list)
+        for elem in elements:
+            elements_by_page[(elem.page_number, elem.element_type)].append(elem)
+
+        captions_by_page = defaultdict(list)
+        for cap in captions:
+            if cap.parsed_number is not None:
+                captions_by_page[(cap.page_number, cap.element_type)].append(cap)
+
+        # For pages with multiple captions AND multiple figures, use position-based matching
+        # If there are multiple figures but only 1 caption, they're likely subfigures that should
+        # all share the same caption (will be merged later by merge_by_shared_captions)
+        for (page_num, elem_type), page_elements in elements_by_page.items():
+            page_captions = captions_by_page.get((page_num, elem_type), [])
+
+            # Only use position matching if we have multiple captions
+            # (multiple figures with 1 caption = subfigures, handle via distance matching)
+            if len(page_captions) > 1 and len(page_elements) > 1:
+                # Multiple captions AND figures on this page - use smart matching
+                # Sort elements by position (top to bottom, left to right)
+                sorted_elements = sorted(page_elements, key=lambda e: (e.bounding_box.y, e.bounding_box.x))
+                # Sort captions by number
+                sorted_captions = sorted(page_captions, key=lambda c: c.parsed_number)
+
+                # Associate in order: first element gets lowest-numbered caption, etc.
+                # If there are more figures than captions, extra figures get the last caption
+                # (likely subfigures of the last figure)
+                for i, elem in enumerate(sorted_elements):
+                    caption_idx = min(i, len(sorted_captions) - 1)
+                    caption = sorted_captions[caption_idx]
+                    associations[elem.element_id] = caption
+                    logger.debug(
+                        f"Associated {elem_type.value} {elem.element_id} with caption "
+                        f"(number={caption.parsed_number}) via position matching"
+                    )
+                continue
+
+        # For remaining elements not yet associated, use standard distance-based matching
         for element in elements:
+            if element.element_id in associations:
+                continue  # Already associated via position matching
+
             best_caption = None
             best_score = float('inf')
 
-            for caption in captions:
+            for caption in real_captions:
                 # Only match captions of the same type on the same page
                 if (caption.element_type != element.element_type or
                     caption.page_number != element.page_number):
@@ -253,8 +300,39 @@ class CaptionParser:
                     f"with caption (number={best_caption.parsed_number})"
                 )
 
-        # Post-process: detect and fix cases where multiple elements share same caption
-        associations = self._fix_shared_captions(elements, captions, associations, pdf_path)
+        # Second pass: for remaining unassociated elements, try synthetic captions
+        # Associate based on expected sequence (elements in reading order get sequential caption numbers)
+        if synthetic_captions:
+            unassociated = [e for e in elements if e.element_id not in associations]
+            # Group by page and type
+            from collections import defaultdict
+            by_page = defaultdict(list)
+            for elem in unassociated:
+                by_page[(elem.page_number, elem.element_type)].append(elem)
+
+            for (page_num, elem_type), page_elements in by_page.items():
+                # Get synthetic captions for this page/type
+                page_synthetic = [c for c in synthetic_captions
+                                 if c.page_number == page_num and c.element_type == elem_type]
+                if not page_synthetic:
+                    continue
+
+                # Sort elements by position (top to bottom, left to right)
+                page_elements.sort(key=lambda e: (e.bounding_box.y, e.bounding_box.x))
+                # Sort synthetic captions by number
+                page_synthetic.sort(key=lambda c: c.parsed_number)
+
+                # Associate in order
+                for elem, caption in zip(page_elements, page_synthetic):
+                    associations[elem.element_id] = caption
+                    logger.info(
+                        f"Associated {elem_type.value} {elem.element_id} with synthetic "
+                        f"caption {caption.parsed_number} on page {page_num}"
+                    )
+
+        # Note: We no longer call _fix_shared_captions here because figures that
+        # share a caption are now handled by merge_by_shared_captions in FigureMerger.
+        # This allows subfigures to be properly merged instead of getting synthetic captions.
 
         return associations
 

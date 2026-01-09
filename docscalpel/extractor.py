@@ -171,6 +171,53 @@ def extract_elements(
                 )
                 all_captions.extend(captions)
 
+            # Find missing figure numbers in the sequence and create synthetic captions
+            if all_captions:
+                from .caption_parser import Caption
+                from .models import BoundingBox
+
+                figure_captions = [c for c in all_captions if c.element_type == ElementType.FIGURE and c.parsed_number is not None]
+                if figure_captions:
+                    detected_numbers = sorted(set(c.parsed_number for c in figure_captions))
+                    min_num = min(detected_numbers)
+                    max_num = max(detected_numbers)
+
+                    # Find missing numbers in the sequence
+                    missing_numbers = [n for n in range(min_num, max_num + 1) if n not in detected_numbers]
+
+                    if missing_numbers:
+                        logger.info(f"Found missing figure numbers: {missing_numbers}")
+
+                        # For each missing number, try to find which page has the actual caption
+                        import fitz
+                        import re
+                        doc = fitz.open(pdf_path)
+                        for missing_num in missing_numbers:
+                            # Search for this figure number with caption pattern (Figure X: description)
+                            # Don't match mere references like "see Figure X" or "in Figure X"
+                            caption_pattern = re.compile(
+                                rf'Figure\s+{missing_num}\s*:',
+                                re.IGNORECASE
+                            )
+                            for page_num in range(1, len(document.pages) + 1):
+                                page = doc[page_num - 1]
+                                text = page.get_text("text")
+
+                                # Only create synthetic caption if there's an actual caption format
+                                if caption_pattern.search(text):
+                                    # Create synthetic caption for this page
+                                    synthetic_caption = Caption(
+                                        text=f"Figure {missing_num}: (YOLO missed caption detection)",
+                                        bounding_box=BoundingBox(x=0, y=0, width=1, height=1, page_number=page_num),
+                                        page_number=page_num,
+                                        element_type=ElementType.FIGURE,
+                                        parsed_number=missing_num
+                                    )
+                                    all_captions.append(synthetic_caption)
+                                    logger.info(f"Created synthetic caption for Figure {missing_num} on page {page_num}")
+                                    break  # Only create one synthetic caption per missing number
+                        doc.close()
+
             # Associate captions with elements
             if all_captions:
                 caption_associations = caption_parser.associate_captions_with_elements(
@@ -179,6 +226,14 @@ def extract_elements(
                 logger.info(
                     f"Associated {len(caption_associations)} captions with elements"
                 )
+
+                # Merge elements that share the same caption (subfigures)
+                if ElementType.FIGURE in config.element_types and len(all_elements) > 1:
+                    logger.info("Merging subfigures with shared captions...")
+                    merger = FigureMerger()
+                    all_elements, caption_associations = merger.merge_by_shared_captions(
+                        all_elements, caption_associations
+                    )
 
         # Step 7: Assign sequence numbers and filenames by type
         all_elements = _assign_sequence_numbers_and_filenames(

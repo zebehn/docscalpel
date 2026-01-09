@@ -23,7 +23,7 @@ if requirements_file.exists():
 
 setup(
     name="docscalpel",
-    version="1.0.0",
+    version="1.1.0",
     description="Surgical precision for PDF element extraction - Extract figures, tables, and equations using deep learning",
     long_description=long_description,
     long_description_content_type="text/markdown",

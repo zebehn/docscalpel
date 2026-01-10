@@ -106,6 +106,27 @@ pip uninstall docscalpel
 pip install -e .
 ```
 
+### Version Mismatch
+
+If `docscalpel --version` shows a different version than expected (e.g., old version after upgrade):
+
+```bash
+# Check if there's a conflicting installation in site-packages
+python -c "import docscalpel; print(docscalpel.__file__)"
+
+# If it points to site-packages instead of your source directory, remove it:
+rm -rf $(python -c "import sys; print([p for p in sys.path if 'site-packages' in p][0])")/docscalpel/
+
+# Reinstall
+pip uninstall docscalpel -y
+pip install -e .
+
+# Verify
+docscalpel --version
+```
+
+This can happen if you previously installed a non-editable version before switching to editable mode.
+
 ### Permission Errors
 
 If you get permission errors on Linux/macOS:

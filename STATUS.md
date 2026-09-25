@@ -1,6 +1,7 @@
 ---
 project: docscalpel
 purpose: 학술 PDF에서 그림·표·수식을 DocLayout-YOLO로 검출해 요소별 PDF 파일로 잘라 내는 Python 라이브러리·명령행 도구를 제공한다.
+owner: [미확인]
 status: 운영
 stage: v1.1.0 기능 구현을 마치고 발표자료 생성 도구(paperdeck, 논문 세미나 발표자료 스킬)의 그림 추출 단계에서 쓰이고 있음. 마지막 코드 변경은 2026-01-10임 (기준일 2026-09-25).
 updated: 2026-09-25
@@ -25,7 +26,7 @@ docs:
 
 # DocScalpel 현황
 
-> 기재 정책: zebehn/mastermind docs/STATUS_POLICY.md (v1.0). 최종 갱신 2026-09-25 (KST).
+> 기재 정책: zebehn/mastermind docs/STATUS_POLICY.md (v1.1). 주 담당 [미확인]. 최종 갱신 2026-09-25 (KST).
 
 ## 요약
 
